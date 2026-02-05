@@ -1,1 +1,6 @@
 rootProject.name = 'sytk'
+include 'sytk-booking'
+include 'sytk-waiting'
+include 'sytk-read'
+include 'sytk-payment'
+
