@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -40,7 +41,7 @@ class ConcertServiceTest {
     void getDetails_Success() {
 
         // given
-        Concert concert = createConcert("bar");
+        Concert concert = createConcert("foo", OffsetDateTime.now(), "bar");
         given(concertRepository.findById(1L)).willReturn(Optional.of(concert));
 
         // when
@@ -48,8 +49,9 @@ class ConcertServiceTest {
 
         // then
         assertThat(response).isNotNull();
-        assertThat(response.title()).isEqualTo("bar");
-        verify(concertRepository).findById(1L);
+        assertThat(response.title()).isEqualTo("foo");
+
+        then(concertRepository).should().findById(1L);
     }
 
     @Test
@@ -70,7 +72,7 @@ class ConcertServiceTest {
 
         // given
         List<Concert> concertList = IntStream.range(1, 21)
-                .mapToObj(i -> createConcert("title " + i))
+                .mapToObj(i -> createConcert("title " + i, OffsetDateTime.now(), "foo"))
                 .toList();
         given(concertRepository.findAll()).willReturn(concertList);
 
@@ -106,9 +108,14 @@ class ConcertServiceTest {
     void create_Success() {
 
         // given
-        ConcertCreateRequest request = new ConcertCreateRequest("new");
+        ConcertCreateRequest request = ConcertCreateRequest.builder()
+                .title("new")
+                .startAt(OffsetDateTime.now())
+                .location("foo")
+                .build();
 
-        Concert concert = createConcert(request.title());
+        Concert concert = createConcert(request.title(), request.startAt(), request.location());
+        ReflectionTestUtils.setField(concert, "id", 1L);    // Mockito는 ID 자동 생성 불가, 테스트를 위해 직접 지정
         given(concertRepository.save(any(Concert.class))).willReturn(concert);
 
         // when
@@ -125,11 +132,11 @@ class ConcertServiceTest {
     /**
      * Helper Method
      */
-    private Concert createConcert(String title) {
+    private Concert createConcert(String title, OffsetDateTime startAt, String location) {
         return Concert.builder()
                 .title(title)
-                .startAt(OffsetDateTime.now())
-                .location("foo")
+                .startAt(startAt)
+                .location(location)
                 .build();
     }
 }
