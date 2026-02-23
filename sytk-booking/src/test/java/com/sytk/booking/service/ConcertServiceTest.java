@@ -3,6 +3,7 @@ package com.sytk.booking.service;
 import com.sytk.booking.domain.Concert;
 import com.sytk.booking.exception.ConcertNotFoundException;
 import com.sytk.booking.repository.ConcertRepository;
+import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.response.ConcertDetailsResponse;
 import com.sytk.booking.response.ConcertListResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +20,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
@@ -38,9 +40,7 @@ class ConcertServiceTest {
     void getDetails_Success() {
 
         // given
-        Concert concert = Concert.builder()
-                .title("foo")
-                .build();
+        Concert concert = createConcert("bar");
         given(concertRepository.findById(1L)).willReturn(Optional.of(concert));
 
         // when
@@ -48,7 +48,7 @@ class ConcertServiceTest {
 
         // then
         assertThat(response).isNotNull();
-        assertThat(response.title()).isEqualTo("foo");
+        assertThat(response.title()).isEqualTo("bar");
         verify(concertRepository).findById(1L);
     }
 
@@ -85,14 +85,6 @@ class ConcertServiceTest {
         then(concertRepository).should(times(1)).findAll();
     }
 
-    private Concert createConcert(String title) {
-        return Concert.builder()
-                .title(title)
-                .startAt(OffsetDateTime.now())
-                .location("foo")
-                .build();
-    }
-
     @Test
     @DisplayName("공연 데이터가 없다면 빈 리스트 반환")
     void getList_Empty() {
@@ -107,5 +99,37 @@ class ConcertServiceTest {
         assertThat(response).isEmpty();
 
         then(concertRepository).should().findAll();
+    }
+
+    @Test
+    @DisplayName("새로운 공연 등록 시 생성된 공연의 상세 정보 반환")
+    void create_Success() {
+
+        // given
+        ConcertCreateRequest request = new ConcertCreateRequest("new");
+
+        Concert concert = createConcert(request.title());
+        given(concertRepository.save(any(Concert.class))).willReturn(concert);
+
+        // when
+        ConcertDetailsResponse response = concertService.create(request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.id()).isEqualTo(1L);
+        assertThat(response.title()).isEqualTo("new");
+
+        then(concertRepository).should().save(any(Concert.class));
+    }
+
+    /**
+     * Helper Method
+     */
+    private Concert createConcert(String title) {
+        return Concert.builder()
+                .title(title)
+                .startAt(OffsetDateTime.now())
+                .location("foo")
+                .build();
     }
 }

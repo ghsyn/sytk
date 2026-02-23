@@ -3,6 +3,7 @@ package com.sytk.booking.service;
 import com.sytk.booking.domain.Concert;
 import com.sytk.booking.exception.ConcertNotFoundException;
 import com.sytk.booking.repository.ConcertRepository;
+import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.response.ConcertDetailsResponse;
 import com.sytk.booking.response.ConcertListResponse;
 import lombok.RequiredArgsConstructor;
@@ -35,5 +36,9 @@ public class ConcertService {
         return concertRepository.findAll().stream()
                 .map(ConcertListResponse::from)
                 .toList();
+    }
+
+    public ConcertDetailsResponse create(ConcertCreateRequest request) {
+        return ConcertDetailsResponse.from(new Concert());
     }
 }
