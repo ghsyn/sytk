@@ -4,6 +4,9 @@ import com.sytk.booking.domain.Concert;
 
 import java.time.OffsetDateTime;
 
+/**
+ * 공연 목록 조회 응답 DTO record
+ */
 public record ConcertListResponse(
         Long id,
         String title,

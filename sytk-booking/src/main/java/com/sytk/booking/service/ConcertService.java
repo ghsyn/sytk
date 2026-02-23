@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +16,10 @@ public class ConcertService {
 
     private final ConcertRepository concertRepository;
 
+    /**
+     * 공연 단건 조회
+     * 시스템용, 실제 사용자 접근 불가
+     */
     public ConcertDetailsResponse getDetails(Long id) {
         Concert concert = concertRepository.findById(id)
                 .orElseThrow(ConcertNotFoundException::new);
@@ -24,9 +27,13 @@ public class ConcertService {
         return ConcertDetailsResponse.from(concert);
     }
 
+    /**
+     * 공연 목록 조회
+     * 시스템용, 실제 사용자 접근 불가
+     */
     public List<ConcertListResponse> getList() {
         return concertRepository.findAll().stream()
                 .map(ConcertListResponse::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

@@ -2,6 +2,10 @@ package com.sytk.booking.exception;
 
 // TODO: GlobalExceptionHandler class 생성
 // TODO: ErrorResponse record 생성
+
+/**
+ * 접근 공연 대상 존재하지 않을 시 예외 발생
+ */
 public class ConcertNotFoundException extends RuntimeException {
 
     private static final int STATUS_CODE = 404;
