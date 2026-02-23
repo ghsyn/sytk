@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,7 +82,7 @@ class ConcertServiceTest {
         assertThat(response.get(0).title()).isEqualTo("title 1");
         assertThat(response.get(19).title()).isEqualTo("title 20");
 
-        then(concertRepository).should().findAll();
+        then(concertRepository).should(times(1)).findAll();
     }
 
     private Concert createConcert(String title) {
@@ -90,5 +91,21 @@ class ConcertServiceTest {
                 .startAt(OffsetDateTime.now())
                 .location("foo")
                 .build();
+    }
+
+    @Test
+    @DisplayName("공연 데이터가 없다면 빈 리스트 반환")
+    void getList_Empty() {
+
+        // given
+        given(concertRepository.findAll()).willReturn(List.of());
+
+        // when
+        List<ConcertListResponse> response = concertService.getList();
+
+        // then
+        assertThat(response).isEmpty();
+
+        then(concertRepository).should().findAll();
     }
 }
