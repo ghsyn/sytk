@@ -1,10 +1,9 @@
-package com.sytk.read.service;
+package com.sytk.booking.service;
 
 import com.sytk.booking.domain.Concert;
 import com.sytk.booking.repository.ConcertRepository;
-import com.sytk.booking.response.ConcertDetailsResponse;
-import com.sytk.booking.service.ConcertService;
 import com.sytk.booking.request.ConcertCreateRequest;
+import com.sytk.booking.response.ConcertDetailsResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
