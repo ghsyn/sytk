@@ -1,6 +1,5 @@
 package com.sytk.read.domain;
 
-import com.sytk.booking.domain.Concert;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,7 +17,7 @@ public class SeatGrade {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "concert_id", nullable = false)
-    private com.sytk.booking.domain.Concert concert;
+    private Concert concert;
 
     @Column(nullable = false)
     private String name;

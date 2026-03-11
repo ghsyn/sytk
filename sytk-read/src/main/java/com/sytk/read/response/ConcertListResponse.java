@@ -1,6 +1,6 @@
-package com.sytk.booking.response;
+package com.sytk.read.response;
 
-import com.sytk.booking.domain.Concert;
+import com.sytk.read.domain.Concert;
 
 import java.time.OffsetDateTime;
 

@@ -1,6 +1,6 @@
 package com.sytk.read.repository;
 
-import com.sytk.booking.domain.Concert;
+import com.sytk.read.domain.Concert;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

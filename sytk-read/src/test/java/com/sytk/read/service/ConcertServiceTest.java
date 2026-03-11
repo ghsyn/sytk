@@ -1,18 +1,16 @@
-package com.sytk.booking.service;
+package com.sytk.read.service;
 
-import com.sytk.booking.domain.Concert;
-import com.sytk.booking.exception.ConcertNotFoundException;
-import com.sytk.booking.repository.ConcertRepository;
-import com.sytk.booking.request.ConcertCreateRequest;
-import com.sytk.booking.response.ConcertDetailsResponse;
-import com.sytk.booking.response.ConcertListResponse;
+import com.sytk.read.domain.Concert;
+import com.sytk.read.exception.ConcertNotFoundException;
+import com.sytk.read.repository.ConcertRepository;
+import com.sytk.read.response.ConcertDetailsResponse;
+import com.sytk.read.response.ConcertListResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -21,7 +19,6 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
@@ -101,32 +98,6 @@ class ConcertServiceTest {
         assertThat(response).isEmpty();
 
         then(concertRepository).should().findAll();
-    }
-
-    @Test
-    @DisplayName("새로운 공연 등록 시 생성된 공연의 상세 정보 반환")
-    void create_Success() {
-
-        // given
-        ConcertCreateRequest request = ConcertCreateRequest.builder()
-                .title("new")
-                .startAt(OffsetDateTime.now())
-                .location("foo")
-                .build();
-
-        Concert concert = createConcert(request.title(), request.startAt(), request.location());
-        ReflectionTestUtils.setField(concert, "id", 1L);    // Mockito는 ID 자동 생성 불가, 테스트를 위해 직접 지정
-        given(concertRepository.save(any(Concert.class))).willReturn(concert);
-
-        // when
-        ConcertDetailsResponse response = concertService.create(request);
-
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.title()).isEqualTo("new");
-
-        then(concertRepository).should().save(any(Concert.class));
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.sytk.read.domain;
 
-import com.sytk.booking.domain.SeatGrade;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
