@@ -12,7 +12,7 @@ public record ConcertDetailsResponse(
         String title,
         OffsetDateTime startAt,
         Integer runningTime,
-        String location,
+        String venue,
         OffsetDateTime ticketOpenAt,
         OffsetDateTime ticketCloseAt
 ) {
@@ -22,7 +22,7 @@ public record ConcertDetailsResponse(
                 concert.getTitle(),
                 concert.getStartAt(),
                 concert.getRunningTime(),
-                concert.getLocation(),
+                concert.getVenue(),
                 concert.getTicketOpenAt(),
                 concert.getTicketCloseAt()
         );

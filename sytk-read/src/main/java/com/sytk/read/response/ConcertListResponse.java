@@ -12,7 +12,7 @@ public record ConcertListResponse(
         String title,
         OffsetDateTime startAt,
         Integer runningTime,
-        String location
+        String venue
 ) {
     public static ConcertListResponse from(Concert concert) {
         return new ConcertListResponse(
@@ -20,7 +20,7 @@ public record ConcertListResponse(
                 concert.getTitle(),
                 concert.getStartAt(),
                 concert.getRunningTime(),
-                concert.getLocation()
+                concert.getVenue()
         );
     }
 }

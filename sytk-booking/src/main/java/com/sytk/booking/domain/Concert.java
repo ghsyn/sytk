@@ -28,7 +28,7 @@ public class Concert {
     private Integer runningTime;
 
     @Column(nullable = false)
-    private String location;
+    private String venue;
 
     private OffsetDateTime ticketOpenAt;
 
@@ -38,12 +38,12 @@ public class Concert {
     private List<SeatGrade> seatGrades = new ArrayList<>();
 
     @Builder
-    public Concert(String title, OffsetDateTime startAt, Integer runningTime, String location,
+    public Concert(String title, OffsetDateTime startAt, Integer runningTime, String venue,
                    OffsetDateTime ticketOpenAt, OffsetDateTime ticketCloseAt) {
         this.title = title;
         this.startAt = startAt;
         this.runningTime = runningTime;
-        this.location = location;
+        this.venue = venue;
         this.ticketOpenAt = ticketOpenAt;
         this.ticketCloseAt = ticketCloseAt;
     }

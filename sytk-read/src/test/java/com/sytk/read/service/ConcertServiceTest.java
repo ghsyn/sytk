@@ -103,11 +103,11 @@ class ConcertServiceTest {
     /**
      * Helper Method
      */
-    private Concert createConcert(String title, OffsetDateTime startAt, String location) {
+    private Concert createConcert(String title, OffsetDateTime startAt, String venue) {
         return Concert.builder()
                 .title(title)
                 .startAt(startAt)
-                .location(location)
+                .venue(venue)
                 .build();
     }
 }
