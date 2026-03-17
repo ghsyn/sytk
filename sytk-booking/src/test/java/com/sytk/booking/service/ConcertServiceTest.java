@@ -62,7 +62,7 @@ class ConcertServiceTest {
     }
 
     @Test
-    @DisplayName("이미 존재하는 공연 제목을 등록하면 DUPLICATE_CONCERT 에러가 발생한다.")
+    @DisplayName("이미 존재하는 공연 제목 등록 시 DUPLICATE_CONCERT 에러 발생")
     void create_fail_duplicateTitle() {
         // given
         ConcertCreateRequest request = ConcertCreateRequest.builder()
@@ -87,8 +87,8 @@ class ConcertServiceTest {
         );
 
         // verify
-        verify(concertRepository, times(1)).existsByTitle(request.title());
-        verify(concertRepository, never()).save(any());
+        then(concertRepository).should(times(1)).existsByTitle(request.title());
+        then(concertRepository).should(never()).save(any());
     }
 
     /**
