@@ -19,7 +19,7 @@ public record ConcertCreateRequest(
         @NotNull(message = "시작시간을 입력하세요.")
         OffsetDateTime startAt,
         @NotBlank(message = "장소를 입력하세요.")
-        @Length(min = 1, max = 255, message = "장소는 10 ~ 255 글자로 입력해주세요.")
+        @Length(min = 10, max = 255, message = "장소는 10 ~ 255 글자로 입력해주세요.")
         String venue,
         Integer runningTime,
         OffsetDateTime ticketOpenAt,

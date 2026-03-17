@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * 공연 DB 접근 Repository
  */
 public interface ConcertRepository extends JpaRepository<Concert, Long> {
+
+    boolean existsByTitle(String title);
 }
