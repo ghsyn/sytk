@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     // 공통
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 입력값입니다."),
+    NOT_CHANGED(HttpStatus.BAD_REQUEST, "변경사항이 없습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
 
     // Concert
