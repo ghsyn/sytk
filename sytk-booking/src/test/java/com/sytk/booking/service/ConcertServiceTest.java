@@ -1,10 +1,7 @@
 package com.sytk.booking.service;
 
 import com.sytk.booking.domain.Concert;
-import com.sytk.booking.exception.ConcertNotFoundException;
-import com.sytk.booking.exception.DuplicateConcertException;
-import com.sytk.booking.exception.ErrorCode;
-import com.sytk.booking.exception.NotChangedException;
+import com.sytk.booking.exception.*;
 import com.sytk.booking.repository.ConcertRepository;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
@@ -171,6 +168,62 @@ class ConcertServiceTest {
         // verify
         then(concertRepository).should(times(1)).findById(notExistId);
         then(concertRepository).should(never()).save(any());
+    }
+
+    /**
+     * 공연 삭제 테스트
+     */
+    @Test
+    @DisplayName("[성공케이스] 공연 삭제 시 delete 로직 호출 확인")
+    void delete_success() {
+        // given
+        Long concertId = 1L;
+        Concert concert = createConcert("foo", now(), "barrrrrrrr");
+
+        given(concertRepository.findById(concertId)).willReturn(Optional.ofNullable(concert));
+        given(concertRepository.existsById(concertId)).willReturn(false);
+
+        // when
+        concertService.delete(concertId);
+
+        // then
+        then(concertRepository).should(times(1)).delete(concert);
+    }
+
+    @Test
+    @DisplayName("[실패케이스 - 접근 검증] 존재하지 않는 공연 삭제 시 ConcertNotFoundException 발생")
+    void delete_fail_notFound() {
+        // given
+        Long concertId = 1L;
+        given(concertRepository.findById(concertId)).willReturn(Optional.empty());
+
+        // when
+        assertThatThrownBy(() -> concertService.delete(concertId))
+                .isInstanceOf(ConcertNotFoundException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CONCERT_NOT_FOUND);
+
+        // verify
+        then(concertRepository).should(never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("[실패케이스 - 리소스 충돌] 예매 내역이 존재하는 공연 삭제 시 ConcertPolicyException 발생")
+    void delete_fail_hasReservation() {
+        // given
+        Long concertId = 1L;
+        Concert concert = createConcert("foo", now(), "barrrrrrrr");
+
+        given(concertRepository.findById(concertId)).willReturn(Optional.ofNullable(concert));
+
+        given(concertRepository.existsById(concertId)).willReturn(true);    // 예매 내역 존재하는 것으로 가정
+
+        // when & then
+        assertThatThrownBy(() -> concertService.delete(concertId))
+                .isInstanceOf(ConcertPolicyException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESERVED_CONCERT);
+
+        // verify
+        then(concertRepository).should(never()).delete(any());
     }
 
     /**

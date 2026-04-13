@@ -1,6 +1,8 @@
 package com.sytk.booking.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sytk.booking.exception.CommonException;
+import com.sytk.booking.exception.ErrorCode;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
 import com.sytk.booking.response.ConcertCreateResponse;
@@ -13,15 +15,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.sytk.booking.exception.ErrorCode.CONCERT_NOT_FOUND;
 import static com.sytk.booking.exception.ErrorCode.INVALID_REQUEST;
 import static java.time.OffsetDateTime.now;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -121,7 +122,7 @@ class ConcertControllerTest {
      */
     @Test
     @DisplayName("[성공케이스] 공연 제목 수정 시 해당 공연의 ID 및 변경 후 제목 반환")
-    void edit_success() throws Exception{
+    void edit_success() throws Exception {
         // given
         Long concertId = 1L;
         ConcertEditRequest request = ConcertEditRequest.builder()
@@ -200,4 +201,59 @@ class ConcertControllerTest {
         then(concertService).should(never()).edit(eq(concertId), any(ConcertEditRequest.class));
     }
 
+    /**
+     * 공연 삭제 테스트
+     */
+    @Test
+    @DisplayName("[성공케이스] 공연 삭제 시 204 상태코드 반환")
+    void delete_success() throws Exception {
+        // given
+        Long concertId = 1L;
+
+        willDoNothing().given(concertService).delete(concertId);    // 생략 가능, 가독성 위해 명시함
+
+        // when & then
+        mockMvc.perform(delete("/api/v1/concert/{id}", concertId))
+                .andExpect(status().isNoContent())
+                .andDo(print());
+
+        // verify
+        then(concertService).should(times(1)).delete(concertId);
+    }
+
+    @Test
+    @DisplayName("[실패케이스 - 접근 검증] 존재하지 않는 공연 삭제 시 CONCERT_NOT_FOUND 에러 발생")
+    void delete_fail_notFound() throws Exception {
+        // given
+        Long concertId = 1L;
+
+        willThrow(new CommonException(ErrorCode.CONCERT_NOT_FOUND)).given(concertService).delete(concertId);
+
+        // when & then
+        mockMvc.perform(delete("/api/v1/concert/{id}", concertId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(CONCERT_NOT_FOUND.getStatus().value()))
+                .andExpect(jsonPath("$.message").value(CONCERT_NOT_FOUND.getMessage()))
+                .andDo(print());
+
+        // verify
+        then(concertService).should(times(1)).delete(concertId);
+    }
+
+    @Test
+    @DisplayName("[실패케이스 - 형식 오류] 요청 URI의 공연 ID 값에 숫자가 아닌 값 입력 시 INVALID_REQUEST 에러 발생")
+    void delete_fail_invalidId() throws Exception {
+        // given
+        String invalidId = "not-a-number";
+
+        // when & then
+        mockMvc.perform(delete("/api/v1/concert/{id}", invalidId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(INVALID_REQUEST.getStatus().value()))
+                .andExpect(jsonPath("$.message").value(INVALID_REQUEST.getMessage()))
+                .andDo(print());
+
+        // verify
+        then(concertService).should(never()).delete(anyLong());
+    }
 }
