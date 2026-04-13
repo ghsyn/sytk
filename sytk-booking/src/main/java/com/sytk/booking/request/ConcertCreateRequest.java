@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Length;
 import java.time.OffsetDateTime;
 
 /**
- * 공연 등록 record
+ * 공연 등록 dto
  */
 @Builder
 public record ConcertCreateRequest(

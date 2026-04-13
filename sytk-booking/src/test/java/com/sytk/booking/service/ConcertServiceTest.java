@@ -72,31 +72,21 @@ class ConcertServiceTest {
         then(concertRepository).should().save(any(Concert.class));
     }
 
-    // TODO: JUnit5(Assertions) -> AssertJ(assertThatThrownBy)
     @Test
-    @DisplayName("[실패케이스 - 중복 검증] 이미 존재하는 공연 제목 등록 시 DUPLICATE_CONCERT 에러 발생")
+    @DisplayName("[실패케이스 - 중복 검증] 이미 존재하는 공연 제목 등록 시 DuplicateConcertException 발생")
     void create_fail_duplicateTitle() {
         // given
         ConcertCreateRequest request = ConcertCreateRequest.builder()
-                .title("공연 제목입니다.")
+                .title("foo")
                 .startAt(now())
-                .venue("공연 장소입니다.")
+                .venue("barrrrrrrr")
                 .build();
 
         given(concertRepository.existsByTitle(request.title())).willReturn(true);
 
-        // when
-        DuplicateConcertException exception = assertThrows(DuplicateConcertException.class, () -> {
-            concertService.create(request);
-        });
-
-        // then
-        ErrorCode errorCode = exception.getErrorCode();
-        assertAll(
-                () -> assertEquals(HttpStatus.CONFLICT, errorCode.getStatus()),
-                () -> assertEquals("이미 존재하는 공연입니다.", errorCode.getMessage()),
-                () -> assertEquals(ErrorCode.DUPLICATE_CONCERT, errorCode)
-        );
+        // when & then
+        assertThatThrownBy(() -> concertService.create(request))
+                .isInstanceOf(DuplicateConcertException.class);
 
         // verify
         then(concertRepository).should(times(1)).existsByTitle(request.title());

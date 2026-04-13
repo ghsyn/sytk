@@ -142,7 +142,7 @@ class ConcertControllerTest {
         mockMvc.perform(patch("/api/v1/concert/{id}", concertId)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(concertId))
                 .andExpect(jsonPath("$.title").value("new title"))
                 .andDo(print());
@@ -192,11 +192,12 @@ class ConcertControllerTest {
                     .content(json))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(INVALID_REQUEST.getStatus().value()))
-                .andExpect(jsonPath("$.message").value("시작시간을 입력하세요."))
+                .andExpect(jsonPath("$.message").value("잘못된 입력값입니다."))
+                .andExpect(jsonPath("$.validation.startAt").value("시작시간을 입력하세요."))
                 .andDo(print());
 
         // verify
-        then(concertService).should(never()).edit(concertId, any(ConcertEditRequest.class));
+        then(concertService).should(never()).edit(eq(concertId), any(ConcertEditRequest.class));
     }
 
 }

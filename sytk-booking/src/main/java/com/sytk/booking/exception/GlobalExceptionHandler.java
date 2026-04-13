@@ -5,15 +5,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * `@Valid` 검증 오류
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> validationExceptionHandler(MethodArgumentNotValidException e) {
         ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
         ErrorResponse response = ErrorResponse.of(errorCode, e.getBindingResult());
+
+        return ResponseEntity.status(errorCode.getStatus()).body(response);
+    }
+
+    /**
+     * Type Mismatch
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> badRequestExceptionHandler() {
+        ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
+        ErrorResponse response = ErrorResponse.from(errorCode);
 
         return ResponseEntity.status(errorCode.getStatus()).body(response);
     }
