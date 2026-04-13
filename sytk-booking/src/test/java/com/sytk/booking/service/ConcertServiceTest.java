@@ -3,6 +3,7 @@ package com.sytk.booking.service;
 import com.sytk.booking.domain.Concert;
 import com.sytk.booking.exception.*;
 import com.sytk.booking.repository.ConcertRepository;
+import com.sytk.booking.repository.ReservationRepository;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
 import com.sytk.booking.response.ConcertCreateResponse;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.OffsetDateTime;
@@ -23,11 +23,11 @@ import static java.time.OffsetDateTime.now;
 import static java.time.OffsetDateTime.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class ConcertServiceTest {
@@ -37,6 +37,9 @@ class ConcertServiceTest {
 
     @Mock
     private ConcertRepository concertRepository;
+
+    @Mock
+    private ReservationRepository reservationRepository;
 
     /**
      * 공연 등록 테스트
@@ -180,8 +183,8 @@ class ConcertServiceTest {
         Long concertId = 1L;
         Concert concert = createConcert("foo", now(), "barrrrrrrr");
 
-        given(concertRepository.findById(concertId)).willReturn(Optional.ofNullable(concert));
-        given(concertRepository.existsById(concertId)).willReturn(false);
+        given(concertRepository.findById(concertId)).willReturn(Optional.of(concert));
+        given(reservationRepository.existsByConcertId(concertId)).willReturn(false);
 
         // when
         concertService.delete(concertId);
@@ -214,8 +217,7 @@ class ConcertServiceTest {
         Concert concert = createConcert("foo", now(), "barrrrrrrr");
 
         given(concertRepository.findById(concertId)).willReturn(Optional.ofNullable(concert));
-
-        given(concertRepository.existsById(concertId)).willReturn(true);    // 예매 내역 존재하는 것으로 가정
+        given(reservationRepository.existsByConcertId(concertId)).willReturn(true);    // 예매 내역 존재하는 것으로 가정
 
         // when & then
         assertThatThrownBy(() -> concertService.delete(concertId))

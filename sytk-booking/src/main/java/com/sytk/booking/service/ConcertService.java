@@ -3,9 +3,11 @@ package com.sytk.booking.service;
 import com.sytk.booking.domain.Concert;
 import com.sytk.booking.domain.ConcertEditor;
 import com.sytk.booking.exception.ConcertNotFoundException;
+import com.sytk.booking.exception.ConcertPolicyException;
 import com.sytk.booking.exception.DuplicateConcertException;
 import com.sytk.booking.exception.NotChangedException;
 import com.sytk.booking.repository.ConcertRepository;
+import com.sytk.booking.repository.ReservationRepository;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
 import com.sytk.booking.response.ConcertCreateResponse;
@@ -20,6 +22,8 @@ import java.util.Objects;
 public class ConcertService {
 
     private final ConcertRepository concertRepository;
+
+    private final ReservationRepository reservationRepository;
 
     /**
      * 공연 등록
@@ -69,5 +73,16 @@ public class ConcertService {
                 Objects.equals(concert.getRunningTime(), editor.runningTime()) &&
                 Objects.equals(concert.getTicketOpenAt(), editor.ticketOpenAt()) &&
                 Objects.equals(concert.getTicketCloseAt(), editor.ticketCloseAt());
+    }
+
+    public void delete(Long id) {
+        Concert concert = concertRepository.findById(id)
+                .orElseThrow(ConcertNotFoundException::new);
+
+        if (reservationRepository.existsByConcertId(id)) {
+            throw new ConcertPolicyException();
+        }
+
+        concertRepository.delete(concert);
     }
 }

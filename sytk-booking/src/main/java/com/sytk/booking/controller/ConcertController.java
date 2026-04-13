@@ -38,4 +38,13 @@ public class ConcertController {
         ConcertEditResponse response = concertService.edit(id, request);
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * 공연 삭제
+     */
+    @DeleteMapping("/api/v1/concert/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        concertService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }
