@@ -38,7 +38,7 @@ public class ConcertService {
         try {
             Concert concert = concertRepository.save(request.toEntity());
             return ConcertCreateResponse.from(concert);
-        } catch (DataIntegrityViolationException e) {   // 동시성 상황에서 DB 유니크 제약 조건 위반 시 발생
+        } catch (DataIntegrityViolationException e) {   // 동시 동일 제목 공연 등록 상황에서 DB 유니크 제약 조건 위반 시 발생
             throw new DuplicateConcertException();
         }
     }
@@ -50,6 +50,10 @@ public class ConcertService {
     public ConcertEditResponse edit(Long id, ConcertEditRequest request) {
         Concert concert = concertRepository.findById(id)
                 .orElseThrow(ConcertNotFoundException::new);
+
+        if (concertRepository.existsByTitle(request.title())) {
+            throw new DuplicateConcertException();
+        }
 
         var editorBuilder = concert.toEditor();
 
@@ -83,6 +87,10 @@ public class ConcertService {
                 Objects.equals(concert.getTicketCloseAt(), editor.ticketCloseAt());
     }
 
+    /**
+     * 공연 삭제
+     */
+    @Transactional
     public void delete(Long id) {
         Concert concert = concertRepository.findById(id)
                 .orElseThrow(ConcertNotFoundException::new);
@@ -91,6 +99,11 @@ public class ConcertService {
             throw new ConcertPolicyException();
         }
 
-        concertRepository.delete(concert);
+        try {
+            concertRepository.delete(concert);
+            concertRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new ConcertPolicyException();  // 삭제와 예매가 동시에 이루어지는 상황에서 삭제 조건 위반 시 발생
+        }
     }
 }

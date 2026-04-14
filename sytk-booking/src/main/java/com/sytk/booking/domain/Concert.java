@@ -1,5 +1,6 @@
 package com.sytk.booking.domain;
 
+import com.sytk.booking.exception.InvalidRequestException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -67,5 +68,15 @@ public class Concert {
         this.venue = editor.venue();
         this.ticketOpenAt = editor.ticketOpenAt();
         this.ticketCloseAt = editor.ticketCloseAt();
+
+        validate();
+    }
+
+    private void validate() {
+        if (this.ticketOpenAt != null && this.ticketCloseAt != null &&
+                this.ticketOpenAt.isAfter(this.ticketCloseAt)) {
+                throw new InvalidRequestException();
+            }
+
     }
 }
