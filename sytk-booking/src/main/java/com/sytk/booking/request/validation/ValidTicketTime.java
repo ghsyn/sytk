@@ -7,7 +7,7 @@ import java.lang.annotation.*;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = TicketTimeValidator.class)
+@Constraint(validatedBy = {TicketTimeEditValidator.class, TicketTimeCreateValidator.class})
 @Documented
 public @interface ValidTicketTime {
     String message() default "티켓 오픈 시간은 마감 시간보다 빨라야 합니다.";
