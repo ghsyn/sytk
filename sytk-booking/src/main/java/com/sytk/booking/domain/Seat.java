@@ -13,8 +13,9 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long seatGradeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seat_grade_id", nullable = false)
+    private SeatGrade seatGrade;
 
     @Column(length = 4, nullable = false)
     private String number;
@@ -30,8 +31,8 @@ public class Seat {
     private Reservation reservation;
 
     @Builder
-    public Seat(Long seatGradeId, String number, SeatStatus status) {
-        this.seatGradeId = seatGradeId;
+    public Seat(SeatGrade seatGrade, String number, SeatStatus status) {
+        this.seatGrade = seatGrade;
         this.number = number;
         this.status = status;
     }

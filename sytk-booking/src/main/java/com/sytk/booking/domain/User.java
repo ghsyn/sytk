@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class User {
 
