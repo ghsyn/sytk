@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.time.OffsetDateTime;
 
 @Builder
-public record ConcertEditor(
+public record ConcertEditor (
         String title,
         OffsetDateTime startAt,
         String venue,

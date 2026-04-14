@@ -173,6 +173,9 @@ class ConcertControllerTest {
                 .andExpect(jsonPath("$.status").value(INVALID_REQUEST.getStatus().value()))
                 .andExpect(jsonPath("$.message").value("잘못된 입력값입니다."))
                 .andDo(print());
+
+        // verify
+        then(concertService).should(never()).edit(anyLong(), any(ConcertEditRequest.class));
     }
 
     @Test

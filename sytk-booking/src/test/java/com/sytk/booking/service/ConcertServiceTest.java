@@ -3,7 +3,7 @@ package com.sytk.booking.service;
 import com.sytk.booking.domain.Concert;
 import com.sytk.booking.exception.*;
 import com.sytk.booking.repository.ConcertRepository;
-import com.sytk.booking.repository.ReservationRepository;
+import com.sytk.booking.repository.ReservationQueryRepository;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
 import com.sytk.booking.response.ConcertCreateResponse;
@@ -39,7 +39,7 @@ class ConcertServiceTest {
     private ConcertRepository concertRepository;
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private ReservationQueryRepository reservationQueryRepository;
 
     /**
      * 공연 등록 테스트
@@ -184,7 +184,7 @@ class ConcertServiceTest {
         Concert concert = createConcert("foo", now(), "barrrrrrrr");
 
         given(concertRepository.findById(concertId)).willReturn(Optional.of(concert));
-        given(reservationRepository.existsByConcertId(concertId)).willReturn(false);
+        given(reservationQueryRepository.existsByConcertId(concertId)).willReturn(false);
 
         // when
         concertService.delete(concertId);
@@ -217,7 +217,7 @@ class ConcertServiceTest {
         Concert concert = createConcert("foo", now(), "barrrrrrrr");
 
         given(concertRepository.findById(concertId)).willReturn(Optional.ofNullable(concert));
-        given(reservationRepository.existsByConcertId(concertId)).willReturn(true);    // 예매 내역 존재하는 것으로 가정
+        given(reservationQueryRepository.existsByConcertId(concertId)).willReturn(true);    // 예매 내역 존재하는 것으로 가정
 
         // when & then
         assertThatThrownBy(() -> concertService.delete(concertId))

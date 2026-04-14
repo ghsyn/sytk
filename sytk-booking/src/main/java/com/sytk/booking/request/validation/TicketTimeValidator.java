@@ -11,6 +11,6 @@ public class TicketTimeValidator implements ConstraintValidator<ValidTicketTime,
             return true;
         }
 
-        return value.ticketCloseAt().isBefore(value.ticketCloseAt());
+        return value.ticketOpenAt().isBefore(value.ticketCloseAt());
     }
 }

@@ -7,13 +7,15 @@ import com.sytk.booking.exception.ConcertPolicyException;
 import com.sytk.booking.exception.DuplicateConcertException;
 import com.sytk.booking.exception.NotChangedException;
 import com.sytk.booking.repository.ConcertRepository;
-import com.sytk.booking.repository.ReservationRepository;
+import com.sytk.booking.repository.ReservationQueryRepository;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
 import com.sytk.booking.response.ConcertCreateResponse;
 import com.sytk.booking.response.ConcertEditResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
@@ -23,7 +25,7 @@ public class ConcertService {
 
     private final ConcertRepository concertRepository;
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationQueryRepository reservationQueryRepository;
 
     /**
      * 공연 등록
@@ -33,12 +35,18 @@ public class ConcertService {
             throw new DuplicateConcertException();
         }
 
-        return ConcertCreateResponse.from(concertRepository.save(request.toEntity()));
+        try {
+            Concert concert = concertRepository.save(request.toEntity());
+            return ConcertCreateResponse.from(concert);
+        } catch (DataIntegrityViolationException e) {   // 동시성 상황에서 DB 유니크 제약 조건 위반 시 발생
+            throw new DuplicateConcertException();
+        }
     }
 
     /**
      * 공연 수정
      */
+    @Transactional
     public ConcertEditResponse edit(Long id, ConcertEditRequest request) {
         Concert concert = concertRepository.findById(id)
                 .orElseThrow(ConcertNotFoundException::new);
@@ -79,7 +87,7 @@ public class ConcertService {
         Concert concert = concertRepository.findById(id)
                 .orElseThrow(ConcertNotFoundException::new);
 
-        if (reservationRepository.existsByConcertId(id)) {
+        if (reservationQueryRepository.existsByConcertId(id)) {
             throw new ConcertPolicyException();
         }
 

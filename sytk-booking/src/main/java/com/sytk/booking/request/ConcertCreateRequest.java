@@ -1,6 +1,7 @@
 package com.sytk.booking.request;
 
 import com.sytk.booking.domain.Concert;
+import com.sytk.booking.request.validation.ValidTicketTime;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import java.time.OffsetDateTime;
  * 공연 등록 dto
  */
 @Builder
+@ValidTicketTime
 public record ConcertCreateRequest(
         @NotBlank(message = "제목을 입력하세요.")
         @Length(min = 1, max = 255, message = "제목은 1 ~ 255 글자로 입력해주세요.")
