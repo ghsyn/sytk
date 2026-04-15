@@ -27,12 +27,18 @@ reviews:
   suggested_labels: true
   auto_apply_labels: true
   labeling_instructions:
-    bug: "Assign this label for bug fixes and error corrections."
-    feature: "Assign this label for new features and functional enhancements."
-    refactor: "Assign this label for code refactoring without business logic changes."
-    documentation: "Assign this label for changes to documentation or README files."
-    performance: "Assign this label for performance optimizations."
-    domain-logic: "Assign this label for critical changes within the domain entity layer."
+    - label: "bug"
+      instructions: "Assign this label for bug fixes and error corrections."
+    - label: "feature"
+      instructions: "Assign this label for new features and functional enhancements."
+    - label: "refactor"
+      instructions: "Assign this label for code refactoring without business logic changes."
+    - label: "documentation"
+      instructions: "Assign this label for changes to documentation or README files."
+    - label: "performance"
+      instructions: "Assign this label for performance optimizations."
+    - label: "domain-logic"
+      instructions: "Assign this label for critical changes within the domain entity layer."
 
   suggested_reviewers: true
   auto_assign_reviewers: false
