@@ -1,5 +1,5 @@
-name: "📅 Daily Task"
-description: "내일 진행할 작업 단위를 등록합니다."
+name: "Task"
+description: "진행할 작업 단위를 등록합니다."
 title: "[TYPE] 작업 요약"
 labels: ["todo"]
 body:
@@ -40,4 +40,6 @@ body:
     attributes:
       label: "⚛️ 브랜치명 생성 가이드"
       description: "이 이슈와 연결될 브랜치명을 미리 작성하세요 (예: feat/booking/12-login-api-implementation)"
-      placeholder: "type/module-name/{#issue-number}-description"
+      placeholder: "type/module-name/{`#issue-number`}-description"
+    validations:
+      required: true
