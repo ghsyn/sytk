@@ -28,15 +28,21 @@
   - **Issue Template:** 템플릿을 준수하며, 작업 목적과 체크리스트를 포함합니다. 
   - **PR Template:** 템플릿을 준수하며, 변경 사항 요약, 관련 이슈 번호, 테스트 결과를 반드시 포함합니다. 
 - 변경이 완료되면 PR을 생성하고 셀프 코드리뷰를 마친 후 CodeRabbit의 리뷰를 확인합니다.
+- 병합 시 기본적으로 `Squash Merge`로 진행하며 merge commit 메시지는 아래와 같이 작성합니다.
+  ```text
+    Merge pull request: `main` ← `병합할 브랜치명`
+    
+    - PR title (#issue-number) ex) [FEAT] 핵심 비즈니스 도메인 모델링 (#1)
+  ```
 
 ## 3. Commit Message Convention
-- **Format:** `Type: 요약` (본문은 필요시 추가)
+- **Format:** `Type: 작업 내용 한글로 요약` (본문은 필요시 추가)
 - **Example:**
   ```text
-  Refactor: 중복되는 DB 연결 로직을 싱글톤 패턴으로 분리               // 50자 이내, 대문자로 시작, 마침표 제거, 현재형/명령문
-  
-  - 서비스 레이어마다 흩어져 있던 Connection 코드를 DBContext로 통합   // 개발 이유 설명, 필수x
-  - 코드 가독성 향상 및 리소스 낭비 방지
+    Refactor: 중복되는 DB 연결 로직을 싱글톤 패턴으로 분리               // 50자 이내, 대문자로 시작, 마침표 제거, 현재형/명령문
+    
+    - 서비스 레이어마다 흩어져 있던 Connection 코드를 DBContext로 통합   // 개발 이유 설명, 필수x
+    - 코드 가독성 향상 및 리소스 낭비 방지
   ```
 - **Types:**
 
