@@ -2,6 +2,8 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import org.junit.jupiter.api.Test;
 
+import static com.tngtech.archunit.base.DescribedPredicate.not;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
@@ -30,15 +32,17 @@ class ArchitectureTest {
     }
 
     @Test
-    void read와_payment는_booking만_의존한다() {
-        classes().that().resideInAnyPackage("..read..", "..payment..")
-                .should().onlyDependOnClassesThat()
-                .resideInAnyPackage(
-                        "..read..",
-                        "..payment..",
-                        "..booking..",
-                        "java..",
-                        "org.springframework.."
+    void read와_payment는_본인_또는_booking만_의존한다() {
+        classes().that().resideInAPackage("..read..")
+                .should().onlyDependOnClassesThat(
+                        resideInAnyPackage("..read..", "..booking..")
+                        .or(not(resideInAnyPackage("com.sytk..")))
+                ).check(importedClasses);
+
+        classes().that().resideInAPackage("..payment..")
+                        .should().onlyDependOnClassesThat(
+                        resideInAnyPackage("..payment..", "..booking..")
+                        .or(not(resideInAnyPackage("com.sytk..")))
                 ).check(importedClasses);
     }
 }
