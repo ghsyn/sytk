@@ -1,0 +1,43 @@
+name: "📅 Daily Task"
+description: "내일 진행할 작업 단위를 등록합니다."
+title: "[TYPE] 작업 요약"
+labels: ["todo"]
+body:
+  - type: checkboxes
+    id: task-category
+    attributes:
+      label: "🆕 작업 유형"
+      options:
+        - label: "FEAT (신규 기능)"
+        - label: "FIX (버그 수정)"
+        - label: "DOCS (문서 작업)"
+        - label: "STYLE (포맷 변경)"
+        - label: "REFACTOR (코드 개선)"
+        - label: "TEST (테스트 코드)"
+        - label: "CHORE (환경 설정)"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "✴️ 작업 상세"
+      placeholder: "내일 진행할 핵심 작업 내용을 요약해주세요."
+    validations:
+      required: true
+
+  - type: textarea
+    id: todo-list
+    attributes:
+      label: "✅ ToDo List"
+      description: "이 이슈 내에서 완료해야 할 세부 할일들을 작성해주세요."
+      placeholder: |
+        - [ ] 
+        - [ ]
+    validations:
+      required: true
+
+  - type: input
+    id: branch-name
+    attributes:
+      label: "⚛️ 브랜치명 생성 가이드"
+      description: "이 이슈와 연결될 브랜치명을 미리 작성하세요 (예: feat/booking/12-login-api-implementation)"
+      placeholder: "type/module-name/{#issue-number}-description"
