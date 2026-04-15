@@ -17,6 +17,7 @@ reviews:
   review_details: false
 
   poem: false
+  enable_prompt_for_ai_agents: false
 
   collapse_walkthrough: false
   changed_files_summary: false
