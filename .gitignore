@@ -17,6 +17,17 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+### OS (macOS/Windows) ###
+.DS_Store
+/**/.DS_Store
+Thumbs.db
+
+### 빌드 및 로그 ###
+build/
+.gradle/
+*.log
+*.temp
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
