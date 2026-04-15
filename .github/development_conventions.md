@@ -15,13 +15,13 @@
 
   |   Type   | Description | Example                            |
   |:--------:|----------|------------------------------------|
-  |   feat   | 새로운 기능 개발 | `feat/12-login-api-implementation` |
-  |   fix    | 버그 수정 | `fix/12-login-error`               |
-  |   docs   | 문서(README, API 문서 등) 수정 | `docs/12-update-readme`               |
-  |  style   | 코드 포맷팅, UI 스타일 변경 (로직 변경 X) | `style/12-fix-margin`                 |
-  | refactor | 코드 리팩토링(기능 변경 없이 구조만 개선) | `refactor/12-clean-auth-logic`        |
-  |   test   | 테스트 코드 작성 및 수정 | `test/12-user-service-test`           |
-  |  chore   | 빌드 설정, 패키지 관리, 환경 설정 변경 | `chore/12-add-dotenv`                 |
+  |   feat   | 새로운 기능 개발 | `feat/booking/12-login-api-implementation` |
+  |   fix    | 버그 수정 | `fix/booking/12-login-error`               |
+  |   docs   | 문서(README, API 문서 등) 수정 | `docs/root/12-update-readme`               |
+  |  style   | 코드 포맷팅, UI 스타일 변경 (로직 변경 X) | `style/read/12-fix-margin`                 |
+  | refactor | 코드 리팩토링(기능 변경 없이 구조만 개선) | `refactor/payment/12-clean-auth-logic`        |
+  |   test   | 테스트 코드 작성 및 수정 | `test/waiting/12-user-service-test`           |
+  |  chore   | 빌드 설정, 패키지 관리, 환경 설정 변경 | `chore/root/12-add-dotenv`                 |
 
 ## 2. PR & Issue Convention:
 - 모든 변경 사항은 Issue 생성을 선행하고, 해당 이슈 번호를 브랜치 명과 PR에 명시합니다. 
@@ -32,7 +32,7 @@
 ## 3. Commit Message Convention
 - **Format:** `Type: 요약` (본문은 필요시 추가)
 - **Example:**
-  ```
+  ```text
   Refactor: 중복되는 DB 연결 로직을 싱글톤 패턴으로 분리               // 50자 이내, 대문자로 시작, 마침표 제거, 현재형/명령문
   
   - 서비스 레이어마다 흩어져 있던 Connection 코드를 DBContext로 통합   // 개발 이유 설명, 필수x

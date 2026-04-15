@@ -16,15 +16,18 @@ reviews:
   review_status: true
   review_details: false
 
+  poem: false
+
   collapse_walkthrough: false
   changed_files_summary: false
   sequence_diagrams: true
+  estimate_code_review_effort: false
 
   assess_linked_issues: true
   related_issues: true
   related_prs: true
 
-  suggested_labels: true
+  suggested_labels: false
   auto_apply_labels: true
   labeling_instructions:
     - label: "bug"
