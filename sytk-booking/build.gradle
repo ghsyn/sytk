@@ -1,21 +1,16 @@
-plugins {
-    id 'java'
-}
-
-group = 'org.example'
-version = 'unspecified'
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     // Web
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    // JPA
+    // JPA + Main DB (write)
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Redis - Redisson (분산락 전용, 캐시 목적 아님)
+    implementation 'org.redisson:redisson-spring-boot-starter:3.52.0'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 
     // Querydsl
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -24,20 +19,14 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 
     // Lombok
-    implementation 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
-    // Test
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'com.tngtech.archunit:archunit-junit5:1.2.1'
-
-    // ArchUnit
-    testImplementation project(':sytk-waiting')
-    testImplementation project(':sytk-read')
-    testImplementation project(':sytk-payment')
 }
 
-test {
-    useJUnitPlatform()
+bootJar {
+    enabled = true
+}
+
+jar {
+    enabled = false
 }
