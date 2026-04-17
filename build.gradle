@@ -35,6 +35,9 @@ subprojects {
         // Hibernate Validator
         implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+        // Actuator
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
         // Test
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

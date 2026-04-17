@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: sytk-payment
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  profiles:
+    active: dev
+
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

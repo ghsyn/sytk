@@ -1,0 +1,14 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: debug

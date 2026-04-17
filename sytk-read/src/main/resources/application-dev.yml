@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    # dev는 replica 없으니 main 그대로 사용(local에서 replica 따로 띄우는 건 오버엔지니어링, docker-compose에서 replica 흉내내기)
+    url: jdbc:postgresql://localhost:5432/ticketing
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: debug
