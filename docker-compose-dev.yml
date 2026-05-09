@@ -1,0 +1,90 @@
+services:
+
+  # infra
+
+  postgres:
+    image: postgres:16
+    container_name: sytk-postgres
+    environment:
+      POSTGRES_DB: sytk
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: sytk-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # application
+
+  booking:
+    build:
+      context: .
+      dockerfile: sytk-booking/Dockerfile
+    container_name: sytk-booking
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  waiting:
+    build:
+      context: .
+      dockerfile: sytk-waiting/Dockerfile
+    container_name: sytk-waiting
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "8082:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  payment:
+    build:
+      context: .
+      dockerfile: sytk-payment/Dockerfile
+    container_name: sytk-payment
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "8083:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  read:
+    build:
+      context: .
+      dockerfile: sytk-read/Dockerfile
+    container_name: sytk-read
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "8084:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
