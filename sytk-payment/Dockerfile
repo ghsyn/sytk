@@ -20,7 +20,7 @@ WORKDIR /app
 
 RUN groupadd -r app && useradd -r -g app app
 
-COPY --from=builder --chown=app:app /app/sytk-booking/build/libs/*.jar app.jar
+COPY --from=builder --chown=app:app /app/sytk-payment/build/libs/*.jar app.jar
 
 USER app
 
