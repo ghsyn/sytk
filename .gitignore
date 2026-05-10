@@ -50,5 +50,4 @@ desktop.ini
 .vscode/
 
 ### Docker, 데이터 ###
-data/
-**/data/
+/data/
