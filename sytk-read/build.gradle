@@ -4,6 +4,7 @@ dependencies {
 
     // JPA + Replica DB (read-only)
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'org.postgresql:postgresql'
 
     // Redis (cache)
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'

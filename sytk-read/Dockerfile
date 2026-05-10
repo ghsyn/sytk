@@ -18,7 +18,11 @@ RUN ./gradlew :sytk-read:bootJar -x test --no-daemon
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-COPY --from=builder /app/sytk-read/build/libs/*.jar app.jar
+RUN groupadd -r app && useradd -r -g app app
+
+COPY --from=builder --chown=app:app /app/sytk-booking/build/libs/*.jar app.jar
+
+USER app
 
 EXPOSE 8082
 
