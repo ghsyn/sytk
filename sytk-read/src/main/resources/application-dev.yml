@@ -8,16 +8,16 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     show-sql: true
 
   data:
     redis:
-      host: sytk-redis
+      host: ${SPRING_DATA_REDIS_HOST:sytk-redis}
       port: 6379
 
   kafka:
-    bootstrap-servers: sytk-kafka:29092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:sytk-kafka:29092}
 
 management:
   endpoint:
