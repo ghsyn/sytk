@@ -1,27 +1,23 @@
-plugins {
-    id 'java'
-}
-
-group = 'org.example'
-version = 'unspecified'
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    implementation project(':sytk-booking')
+    // Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    // JPA
+    // JPA + Main DB (write)
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 
     // Lombok
-    implementation 'org.projectlombok:lombok:1.18.42'
-
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 }
 
-test {
-    useJUnitPlatform()
+bootJar {
+    enabled = true
+}
+
+jar {
+    enabled = false
 }

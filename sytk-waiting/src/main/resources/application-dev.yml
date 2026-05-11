@@ -1,0 +1,14 @@
+spring:
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:sytk-redis}
+      port: 6379
+
+management:
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    root: info

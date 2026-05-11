@@ -1,0 +1,20 @@
+# Build artifacts
+**/build/
+**/out/
+.gradle/
+bin/
+
+# IDE & OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Version Control
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose-dev.yml

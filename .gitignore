@@ -1,9 +1,19 @@
+### 로컬 환경 변수 ###
+.env
+*.env.local
+
+### 빌드, 종속성 ###
 HELP.md
-.gradle
+.gradle/
 build/
+bin/
+out/
 !gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+
+### 로그, 임시 파일 ###
+*.log
+*.temp
+*.tmp
 
 ### STS ###
 .apt_generated
@@ -13,27 +23,19 @@ build/
 .settings
 .springBeans
 .sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
 
 ### OS (macOS/Windows) ###
 .DS_Store
 /**/.DS_Store
 Thumbs.db
-
-### 빌드 및 로그 ###
-build/
-.gradle/
-*.log
-*.temp
+desktop.ini
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
-out/
+/out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
@@ -46,3 +48,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Docker, 데이터 ###
+/data/
