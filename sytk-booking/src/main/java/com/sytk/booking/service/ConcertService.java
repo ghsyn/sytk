@@ -51,9 +51,10 @@ public class ConcertService {
         Concert concert = concertRepository.findById(id)
                 .orElseThrow(ConcertNotFoundException::new);
 
-        if (concertRepository.existsByTitle(request.title())) {
-            throw new DuplicateConcertException();
-        }
+        if (request.title() != null && !concert.getTitle().equals(request.title())
+                && concertRepository.existsByTitle(request.title())) {
+                throw new DuplicateConcertException();
+            }
 
         var editorBuilder = concert.toEditor();
 

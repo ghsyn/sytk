@@ -1,0 +1,43 @@
+### 1-1. 공연 등록1
+POST http://localhost:8080/api/v1/concert
+Content-Type: application/json
+
+{
+  "title": "2026 인천펜타포트 락 페스티벌 with 국민은행",
+  "start_at": "2026-08-07T15:00:00+09:00",
+  "venue": "송도달빛축제공원",
+  "ticket_open_at": "2026-06-01T14:00:00+09:00",
+  "ticket_close_at": "2026-08-06T23:59:59+09:00"
+}
+
+### 1-2. 공연 등록2
+POST http://localhost:8080/api/v1/concert
+Content-Type: application/json
+
+{
+  "title": "[2026 신한 SOL KBO 리그] SSG랜더스 vs KIA 타이거즈",
+  "start_at": "2026-05-24T14:00:00+09:00",
+  "venue": "KIA 챔피언스필드",
+  "ticket_open_at": "2026-05-17T11:00:00+09:00",
+  "ticket_close_at": "2026-05-24T10:00:00+09:00"
+}
+
+### 1-3. 공연 등록 실패 케이스 (필수 값 누락)
+POST http://localhost:8080/api/v1/concert
+Content-Type: application/json
+
+{
+  "title": "공연 제목만 있는 잘못된 요청"
+}
+
+### 2. 공연 수정
+PATCH http://localhost:8080/api/v1/concert/1
+Content-Type: application/json
+
+{
+  "title" : "2026 인천펜타포트 락 페스티벌 with 국민은행",
+  "running_time" : 200
+}
+
+### 3. 공연 삭제
+DELETE http://localhost:8080/api/v1/concert/3

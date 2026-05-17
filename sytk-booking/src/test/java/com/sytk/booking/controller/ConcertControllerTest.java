@@ -92,13 +92,13 @@ class ConcertControllerTest {
     }
 
     @Test
-    @DisplayName("[실패케이스 - 필드 유효성 검증2] 공연 등록 시 장소가 10 ~ 255자가 아니면 INVALID_REQUEST 에러 발생")
+    @DisplayName("[실패케이스 - 필드 유효성 검증2] 공연 등록 시 장소가 4 ~ 255자가 아니면 INVALID_REQUEST 에러 발생")
     void create_fail_venueLength() throws Exception {
         // given
         ConcertCreateRequest request = ConcertCreateRequest.builder()
                 .title("foo")
                 .startAt(now())
-                .venue("공연 장소입니다.")     // 9글자
+                .venue("장소")
                 .build();
 
         String json = objectMapper.writeValueAsString(request);
@@ -110,7 +110,7 @@ class ConcertControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(INVALID_REQUEST.getStatus().value()))
                 .andExpect(jsonPath("$.message").value("잘못된 입력값입니다."))
-                .andExpect(jsonPath("$.validation.venue").value("장소는 10 ~ 255 글자로 입력해주세요."))
+                .andExpect(jsonPath("$.validation.venue").value("장소는 4 ~ 255 글자로 입력해주세요."))
                 .andDo(print());
 
         // verify
@@ -176,32 +176,6 @@ class ConcertControllerTest {
 
         // verify
         then(concertService).should(never()).edit(anyLong(), any(ConcertEditRequest.class));
-    }
-
-    @Test
-    @DisplayName("[실패케이스 - 필드 유효성 검증] 제목, 시작시간, 장소 중 하나라도 빈 값을 저장할 시 INVALID_REQUEST 에러 발생")
-    void edit_fail_emptyField() throws Exception {
-        // given
-        Long concertId = 1L;
-        ConcertEditRequest request = ConcertEditRequest.builder()
-                .title("new title")
-                .venue("10글자 이상의 공연 장소")
-                .build();
-
-        String json = objectMapper.writeValueAsString(request);
-
-        // when & then
-        mockMvc.perform(patch("/api/v1/concert/{id}", concertId)
-                    .contentType(APPLICATION_JSON)
-                    .content(json))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(INVALID_REQUEST.getStatus().value()))
-                .andExpect(jsonPath("$.message").value("잘못된 입력값입니다."))
-                .andExpect(jsonPath("$.validation.startAt").value("시작시간을 입력하세요."))
-                .andDo(print());
-
-        // verify
-        then(concertService).should(never()).edit(eq(concertId), any(ConcertEditRequest.class));
     }
 
     /**

@@ -30,7 +30,7 @@
 - 변경이 완료되면 PR을 생성하고 셀프 코드리뷰를 마친 후 CodeRabbit의 리뷰를 확인합니다.
 - 병합 시 기본적으로 `Squash Merge`로 진행하며 merge commit 메시지는 아래와 같이 작성합니다.
   ```text
-    Merge pull request: `main` ← `병합할 브랜치명`
+    Merge pull request(#pr-number): `main` ← `병합할 브랜치명`
     
     - PR title (#issue-number) ex) [FEAT] 핵심 비즈니스 도메인 모델링 (#1)
   ```
