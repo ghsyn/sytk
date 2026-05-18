@@ -3,27 +3,30 @@ package com.sytk.booking.domain;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@Table(name = "seat_grade")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SeatGrade {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "concert_id", nullable = false)
-    private Concert concert;
-
     @Column(nullable = false)
     private String name;
 
-    @Column(precision = 7, scale = 0, nullable = false)
+    @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal price;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "concert_id", nullable = false)
+    private Concert concert;
 
     @Builder
     public SeatGrade(Concert concert, String name, BigDecimal price) {

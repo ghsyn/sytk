@@ -9,12 +9,10 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicUpdate
 public class Concert {
 
@@ -37,9 +35,6 @@ public class Concert {
 
     private OffsetDateTime ticketCloseAt;
 
-    @OneToMany(mappedBy = "concert")
-    private List<SeatGrade> seatGrades = new ArrayList<>();
-
     @Builder
     public Concert(String title, OffsetDateTime startAt, Integer runningTime, String venue,
                    OffsetDateTime ticketOpenAt, OffsetDateTime ticketCloseAt) {
@@ -49,6 +44,8 @@ public class Concert {
         this.venue = venue;
         this.ticketOpenAt = ticketOpenAt;
         this.ticketCloseAt = ticketCloseAt;
+
+        validate();
     }
 
     public ConcertEditor.ConcertEditorBuilder toEditor() {
@@ -73,10 +70,16 @@ public class Concert {
     }
 
     private void validate() {
+        // 1. 티켓 오픈 시간은 마감 시간보다 빨라야 합니다.
         if (this.ticketOpenAt != null && this.ticketCloseAt != null &&
                 this.ticketOpenAt.isAfter(this.ticketCloseAt)) {
-                throw new InvalidRequestException();
-            }
+            throw new InvalidRequestException();
+        }
 
+        // 2. 티켓 예매 마감 시간은 공연 시작 시간보다 빨라야 합니다.
+        if (this.ticketCloseAt != null && this.startAt != null &&
+                this.ticketCloseAt.isAfter(this.startAt)) {
+            throw new InvalidRequestException();
+        }
     }
 }
