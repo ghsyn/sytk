@@ -24,14 +24,18 @@ public class SeatGrade {
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal price;
 
+    @Column(nullable = false)
+    private Integer totalSeatCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "concert_id", nullable = false)
     private Concert concert;
 
     @Builder
-    public SeatGrade(Concert concert, String name, BigDecimal price) {
+    public SeatGrade(String name, BigDecimal price, Integer totalSeatCount, Concert concert) {
         this.concert = concert;
         this.name = name;
         this.price = price;
+        this.totalSeatCount = totalSeatCount;
     }
 }

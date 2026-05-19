@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
@@ -27,9 +24,6 @@ public class User {
 
     @Column(nullable = false)
     private String name;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Reservation> reservations = new ArrayList<>();
 
     public User(String oauthId, String provider, String email, String name) {
         this.oauthId = oauthId;

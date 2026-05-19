@@ -15,24 +15,23 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seat_id", nullable = false, unique = true)
-    private Seat seat;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ReservationStatus status;
 
     private OffsetDateTime expiredAt;
 
+    @Column(nullable = false)
+    private Long userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seat_id", nullable = false)
+    private Seat seat;
+
     @Builder
-    public Reservation (Seat seat, User user, ReservationStatus status, OffsetDateTime expiredAt) {
+    public Reservation(ReservationStatus status, OffsetDateTime expiredAt, Seat seat, Long userId) {
         this.seat = seat;
-        this.user = user;
+        this.userId = userId;
         this.status = status;
         this.expiredAt = expiredAt;
     }

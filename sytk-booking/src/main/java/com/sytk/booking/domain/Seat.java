@@ -6,18 +6,14 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Seat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seat_grade_id", nullable = false)
-    private SeatGrade seatGrade;
-
-    @Column(length = 4, nullable = false)
+    @Column(length = 10, nullable = false)
     private String number;
 
     @Enumerated(EnumType.STRING)
@@ -27,8 +23,9 @@ public class Seat {
     @Version
     private Integer version;
 
-    @OneToOne(mappedBy = "seat")
-    private Reservation reservation;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seat_grade_id", nullable = false)
+    private SeatGrade seatGrade;
 
     @Builder
     public Seat(SeatGrade seatGrade, String number, SeatStatus status) {
