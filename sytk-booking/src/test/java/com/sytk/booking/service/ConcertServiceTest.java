@@ -4,8 +4,10 @@ import com.sytk.booking.domain.Concert;
 import com.sytk.booking.exception.*;
 import com.sytk.booking.repository.ConcertRepository;
 import com.sytk.booking.repository.ReservationQueryRepository;
+import com.sytk.booking.repository.SeatGradeRepository;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
+import com.sytk.booking.request.SeatGradeCreateRequest;
 import com.sytk.booking.response.ConcertCreateResponse;
 import com.sytk.booking.response.ConcertEditResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -16,14 +18,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static java.time.OffsetDateTime.now;
-import static java.time.OffsetDateTime.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
@@ -39,6 +43,9 @@ class ConcertServiceTest {
     private ConcertRepository concertRepository;
 
     @Mock
+    private SeatGradeRepository seatGradeRepository;
+
+    @Mock
     private ReservationQueryRepository reservationQueryRepository;
 
     /**
@@ -51,13 +58,10 @@ class ConcertServiceTest {
         ConcertCreateRequest request = ConcertCreateRequest.builder()
                 .title("new")
                 .startAt(now())
-                .venue("foo")
+                .venue("barr")
                 .build();
 
-        /* Mockito는 `@GeneratedValue` 불가하므로 "id = null"
-              -> 테스트를 위해 서비스 내부의 save()가 호출되었을 때 "id = 1L" 반환되도록 강제 지정 */
-        Concert concert = createConcert(request.title(), request.startAt(), request.venue());
-        ReflectionTestUtils.setField(concert, "id", 1L);
+        Concert concert = createConcert(1L, request.title(), request.startAt(), request.venue());
 
         given(concertRepository.save(any(Concert.class))).willReturn(concert);
 
@@ -73,13 +77,54 @@ class ConcertServiceTest {
     }
 
     @Test
+    @DisplayName("[성공케이스] 좌석 등급 정보가 포함된 새로운 공연 등록 시 좌석 등급 리스트 생성 후 생성된 공연의 ID 및 제목 반환")
+    void create_with_seat_grades_success() {
+        // given
+        SeatGradeCreateRequest vipGrade = SeatGradeCreateRequest.builder()
+                .name("VIP")
+                .price(BigDecimal.valueOf(150000))
+                .totalSeatCount(100)
+                .build();
+
+        SeatGradeCreateRequest rGrade = SeatGradeCreateRequest.builder()
+                .name("R")
+                .price(BigDecimal.valueOf(120000))
+                .totalSeatCount(150)
+                .build();
+
+        List<SeatGradeCreateRequest> seatGradeList = List.of(vipGrade, rGrade);
+
+        ConcertCreateRequest request = ConcertCreateRequest.builder()
+                .title("foo")
+                .startAt(now())
+                .venue("barr")
+                .seatGradeList(seatGradeList)
+                .build();
+
+        Concert concert = createConcert(1L, request.title(), request.startAt(), request.venue());
+
+        given(concertRepository.save(any(Concert.class))).willReturn(concert);
+
+        // when
+        ConcertCreateResponse response = concertService.create(request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.id()).isEqualTo(1L);
+        assertThat(response.title()).isEqualTo("foo");
+
+        then(concertRepository).should().save(any(Concert.class));
+        then(seatGradeRepository).should().saveAll(anyList());
+    }
+
+    @Test
     @DisplayName("[실패케이스 - 중복 검증] 이미 존재하는 공연 제목 등록 시 DuplicateConcertException 발생")
     void create_fail_duplicateTitle() {
         // given
         ConcertCreateRequest request = ConcertCreateRequest.builder()
                 .title("foo")
                 .startAt(now())
-                .venue("barrrrrrrr")
+                .venue("barr")
                 .build();
 
         given(concertRepository.existsByTitle(request.title())).willReturn(true);
@@ -101,8 +146,7 @@ class ConcertServiceTest {
     void edit_success() {
         // given
         Long concertId = 1L;
-        Concert concert = createConcert("foo", now(), "10글자 이상 bar");
-        ReflectionTestUtils.setField(concert, "id", concertId);
+        Concert concert = createConcert(1L, "foo", now(), "barr");
 
         ConcertEditRequest request = ConcertEditRequest.builder()
                 .title("new title")
@@ -128,11 +172,10 @@ class ConcertServiceTest {
         // given
         Long concertId = 1L;
         String title = "foo";
-        OffsetDateTime startAt = parse("2026-04-14T00:00:00+09:00");
-        String venue = "10글자 이상 bar";
+        OffsetDateTime startAt = now().plusDays(1);
+        String venue = "barr";
 
-        Concert concert = createConcert(title, startAt, venue);
-        ReflectionTestUtils.setField(concert, "id", concertId);
+        Concert concert = createConcert(concertId, title, startAt, venue);
 
         ConcertEditRequest request = ConcertEditRequest.builder()
                 .title(title)
@@ -181,7 +224,7 @@ class ConcertServiceTest {
     void delete_success() {
         // given
         Long concertId = 1L;
-        Concert concert = createConcert("foo", now(), "barrrrrrrr");
+        Concert concert = createConcert(concertId, "foo", now(), "barr");
 
         given(concertRepository.findById(concertId)).willReturn(Optional.of(concert));
         given(reservationQueryRepository.existsByConcertId(concertId)).willReturn(false);
@@ -214,7 +257,7 @@ class ConcertServiceTest {
     void delete_fail_hasReservation() {
         // given
         Long concertId = 1L;
-        Concert concert = createConcert("foo", now(), "barrrrrrrr");
+        Concert concert = createConcert(concertId, "foo", now(), "barr");
 
         given(concertRepository.findById(concertId)).willReturn(Optional.ofNullable(concert));
         given(reservationQueryRepository.existsByConcertId(concertId)).willReturn(true);    // 예매 내역 존재하는 것으로 가정
@@ -231,11 +274,18 @@ class ConcertServiceTest {
     /**
      * Helper Method
      */
-    private Concert createConcert(String title, OffsetDateTime startAt, String venue) {
-        return Concert.builder()
+    private Concert createConcert(Long id, String title, OffsetDateTime startAt, String venue) {
+        Concert concert = Concert.builder()
                 .title(title)
                 .startAt(startAt)
                 .venue(venue)
                 .build();
+
+        if (id != null) {
+            /* Mockito는 `@GeneratedValue` 불가하므로 "id = null"
+              -> 테스트를 위해 서비스 내부의 save()가 호출되었을 때 "id = 1L" 반환되도록 강제 지정 */
+            ReflectionTestUtils.setField(concert, "id", id);
+        }
+        return concert;
     }
 }

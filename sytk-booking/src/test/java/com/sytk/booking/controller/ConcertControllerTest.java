@@ -5,6 +5,7 @@ import com.sytk.booking.exception.CommonException;
 import com.sytk.booking.exception.ErrorCode;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
+import com.sytk.booking.request.SeatGradeCreateRequest;
 import com.sytk.booking.response.ConcertCreateResponse;
 import com.sytk.booking.response.ConcertEditResponse;
 import com.sytk.booking.service.ConcertService;
@@ -15,12 +16,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import static com.sytk.booking.exception.ErrorCode.CONCERT_NOT_FOUND;
 import static com.sytk.booking.exception.ErrorCode.INVALID_REQUEST;
 import static java.time.OffsetDateTime.now;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -50,6 +53,47 @@ class ConcertControllerTest {
                 .title("foo")
                 .startAt(now())
                 .venue("barrrrrrrr")
+                .build();
+
+        ConcertCreateResponse response = new ConcertCreateResponse(1L, "foo");
+        given(concertService.create(any(ConcertCreateRequest.class))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/concert")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.title").value("foo"))
+                .andDo(print());
+
+        // verify
+        then(concertService).should(times(1)).create(any(ConcertCreateRequest.class));
+    }
+
+    @Test
+    @DisplayName("[성공케이스] 좌석 등급 정보가 포함된 공연 등록 시 좌석 등급 리스트 생성 후 201 상태코드 및 ID, 제목 반환")
+    void create_with_seat_grades_success() throws Exception {
+        // given
+        SeatGradeCreateRequest vipGrade = SeatGradeCreateRequest.builder()
+                .name("VIP")
+                .price(BigDecimal.valueOf(150000))
+                .totalSeatCount(100)
+                .build();
+
+        SeatGradeCreateRequest rGrade = SeatGradeCreateRequest.builder()
+                .name("R")
+                .price(BigDecimal.valueOf(120000))
+                .totalSeatCount(150)
+                .build();
+
+        List<SeatGradeCreateRequest> seatGradeList = List.of(vipGrade, rGrade);
+
+        ConcertCreateRequest request = ConcertCreateRequest.builder()
+                .title("foo")
+                .startAt(now())
+                .venue("barr")
+                .seatGradeList(seatGradeList)
                 .build();
 
         ConcertCreateResponse response = new ConcertCreateResponse(1L, "foo");
