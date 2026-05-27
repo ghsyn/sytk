@@ -2,12 +2,14 @@ package com.sytk.booking.request;
 
 import com.sytk.booking.domain.Concert;
 import com.sytk.booking.request.validation.ValidTicketTime;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * 공연 등록 dto
@@ -25,7 +27,9 @@ public record ConcertCreateRequest(
         String venue,
         Integer runningTime,
         OffsetDateTime ticketOpenAt,
-        OffsetDateTime ticketCloseAt
+        OffsetDateTime ticketCloseAt,
+        @Valid
+        List<SeatGradeCreateRequest> seatGradeList
 ) {
         public Concert toEntity() {
                 return Concert.builder()
@@ -36,5 +40,9 @@ public record ConcertCreateRequest(
                         .ticketOpenAt(ticketOpenAt)
                         .ticketCloseAt(ticketCloseAt)
                         .build();
+        }
+
+        public boolean hasSeatGradeList() {
+                return seatGradeList != null && !seatGradeList.isEmpty();
         }
 }

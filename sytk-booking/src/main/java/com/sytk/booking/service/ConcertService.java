@@ -2,12 +2,14 @@ package com.sytk.booking.service;
 
 import com.sytk.booking.domain.Concert;
 import com.sytk.booking.domain.ConcertEditor;
+import com.sytk.booking.domain.SeatGrade;
 import com.sytk.booking.exception.ConcertNotFoundException;
 import com.sytk.booking.exception.ConcertPolicyException;
 import com.sytk.booking.exception.DuplicateConcertException;
 import com.sytk.booking.exception.NotChangedException;
 import com.sytk.booking.repository.ConcertRepository;
 import com.sytk.booking.repository.ReservationQueryRepository;
+import com.sytk.booking.repository.SeatGradeRepository;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
 import com.sytk.booking.response.ConcertCreateResponse;
@@ -17,6 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -24,6 +27,8 @@ import java.util.Objects;
 public class ConcertService {
 
     private final ConcertRepository concertRepository;
+
+    private final SeatGradeRepository seatGradeRepository;
 
     private final ReservationQueryRepository reservationQueryRepository;
 
@@ -37,7 +42,17 @@ public class ConcertService {
 
         try {
             Concert concert = concertRepository.save(request.toEntity());
+
+            if (request.hasSeatGradeList()) {
+                List<SeatGrade> seatGradeList = request.seatGradeList().stream()
+                        .map(seatGradeDto -> seatGradeDto.toEntity(concert))
+                        .toList();
+
+                seatGradeRepository.saveAll(seatGradeList);
+            }
+
             return ConcertCreateResponse.from(concert);
+
         } catch (DataIntegrityViolationException e) {   // 동시 동일 제목 공연 등록 상황에서 DB 유니크 제약 조건 위반 시 발생
             throw new DuplicateConcertException();
         }
