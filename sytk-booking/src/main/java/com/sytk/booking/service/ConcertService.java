@@ -3,15 +3,13 @@ package com.sytk.booking.service;
 import com.sytk.booking.domain.Concert;
 import com.sytk.booking.domain.ConcertEditor;
 import com.sytk.booking.domain.SeatGrade;
-import com.sytk.booking.exception.ConcertNotFoundException;
-import com.sytk.booking.exception.ConcertPolicyException;
-import com.sytk.booking.exception.DuplicateConcertException;
-import com.sytk.booking.exception.NotChangedException;
+import com.sytk.booking.exception.*;
 import com.sytk.booking.repository.ConcertRepository;
 import com.sytk.booking.repository.ReservationQueryRepository;
 import com.sytk.booking.repository.SeatGradeRepository;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
+import com.sytk.booking.request.SeatGradeCreateRequest;
 import com.sytk.booking.response.ConcertCreateResponse;
 import com.sytk.booking.response.ConcertEditResponse;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +38,17 @@ public class ConcertService {
             throw new DuplicateConcertException();
         }
 
+        if (request.hasSeatGradeList()) {
+            long distinctCount = request.seatGradeList().stream()
+                    .map(SeatGradeCreateRequest::name)
+                    .distinct()
+                    .count();
+
+            if (distinctCount != request.seatGradeList().size()) {
+                throw new DuplicateSeatGradeException();
+            }
+        }
+
         try {
             Concert concert = concertRepository.save(request.toEntity());
 
@@ -54,6 +63,9 @@ public class ConcertService {
             return ConcertCreateResponse.from(concert);
 
         } catch (DataIntegrityViolationException e) {   // 동시 동일 제목 공연 등록 상황에서 DB 유니크 제약 조건 위반 시 발생
+            if (e.getMessage().contains("seat_grade") || e.getMessage().contains("UK_SEAT_GRADE")) {
+                throw new DuplicateSeatGradeException();
+            }
             throw new DuplicateConcertException();
         }
     }
