@@ -2,11 +2,13 @@ package com.sytk.booking.service;
 
 import com.sytk.booking.domain.Concert;
 import com.sytk.booking.domain.ConcertEditor;
+import com.sytk.booking.domain.Seat;
 import com.sytk.booking.domain.SeatGrade;
 import com.sytk.booking.exception.*;
 import com.sytk.booking.repository.ConcertRepository;
 import com.sytk.booking.repository.ReservationQueryRepository;
 import com.sytk.booking.repository.SeatGradeRepository;
+import com.sytk.booking.repository.SeatRepository;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
 import com.sytk.booking.request.SeatGradeCreateRequest;
@@ -28,11 +30,14 @@ public class ConcertService {
 
     private final SeatGradeRepository seatGradeRepository;
 
+    private final SeatRepository seatRepository;
+
     private final ReservationQueryRepository reservationQueryRepository;
 
     /**
      * 공연 등록
      */
+    @Transactional
     public ConcertCreateResponse create(ConcertCreateRequest request) {
         if (concertRepository.existsByTitle(request.title())) {
             throw new DuplicateConcertException();
@@ -58,11 +63,19 @@ public class ConcertService {
                         .toList();
 
                 seatGradeRepository.saveAll(seatGradeList);
+
+                List<Seat> seatList = seatGradeList.stream()
+                        .flatMap(seatGrade -> seatGrade.createSeats().stream())
+                        .toList();
+
+                if (!seatList.isEmpty()) {
+                    seatRepository.saveAll(seatList);
+                }
             }
 
             return ConcertCreateResponse.from(concert);
 
-        } catch (DataIntegrityViolationException e) {   // 동시 동일 제목 공연 등록 상황에서 DB 유니크 제약 조건 위반 시 발생
+        } catch (DataIntegrityViolationException e) {   // 동시 동일한 공연, 좌석 등급 등록 상황에서 DB 유니크 제약 조건 위반 시 발생
             if (e.getMessage().contains("seat_grade") || e.getMessage().contains("UK_SEAT_GRADE")) {
                 throw new DuplicateSeatGradeException();
             }

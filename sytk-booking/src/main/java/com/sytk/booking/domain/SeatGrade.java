@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "seat_grade")
@@ -37,5 +39,19 @@ public class SeatGrade {
         this.name = name;
         this.price = price;
         this.totalSeatCount = totalSeatCount;
+    }
+
+    public List<Seat> createSeats() {
+        List<Seat> seatList = new ArrayList<>();
+
+        for (int i = 0; i < this.totalSeatCount; i++) {
+            seatList.add(Seat.builder()
+                    .seatGrade(this)
+                    .number(i + 1)
+                    .status(SeatStatus.CLOSED)
+                    .build());
+        }
+
+        return seatList;
     }
 }
