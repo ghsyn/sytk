@@ -5,6 +5,7 @@ import com.sytk.booking.exception.*;
 import com.sytk.booking.repository.ConcertRepository;
 import com.sytk.booking.repository.ReservationQueryRepository;
 import com.sytk.booking.repository.SeatGradeRepository;
+import com.sytk.booking.repository.SeatRepository;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
 import com.sytk.booking.request.SeatGradeCreateRequest;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
@@ -44,6 +46,9 @@ class ConcertServiceTest {
 
     @Mock
     private SeatGradeRepository seatGradeRepository;
+
+    @Mock
+    private SeatRepository seatRepository;
 
     @Mock
     private ReservationQueryRepository reservationQueryRepository;
@@ -80,19 +85,10 @@ class ConcertServiceTest {
     @DisplayName("[성공케이스] 좌석 등급 정보가 포함된 새로운 공연 등록 시 좌석 등급 리스트 생성 후 생성된 공연의 ID 및 제목 반환")
     void create_with_seat_grades_success() {
         // given
-        SeatGradeCreateRequest vipGrade = SeatGradeCreateRequest.builder()
-                .name("VIP")
-                .price(BigDecimal.valueOf(150000))
-                .totalSeatCount(100)
-                .build();
-
-        SeatGradeCreateRequest rGrade = SeatGradeCreateRequest.builder()
-                .name("R")
-                .price(BigDecimal.valueOf(120000))
-                .totalSeatCount(150)
-                .build();
-
-        List<SeatGradeCreateRequest> seatGradeList = List.of(vipGrade, rGrade);
+        List<SeatGradeCreateRequest> seatGradeList = List.of(
+                createSeatGradeRequest("VIP", 150000, 5),
+                createSeatGradeRequest("R", 120000, 10)
+        );
 
         ConcertCreateRequest request = ConcertCreateRequest.builder()
                 .title("foo")
@@ -113,8 +109,9 @@ class ConcertServiceTest {
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.title()).isEqualTo("foo");
 
-        then(concertRepository).should().save(any(Concert.class));
-        then(seatGradeRepository).should().saveAll(anyList());
+        then(concertRepository).should(times(1)).save(any(Concert.class));
+        then(seatGradeRepository).should(times(1)).saveAll(anyList());
+        then(seatRepository).should(times(1)).saveAll(anyList());
     }
 
     @Test
@@ -168,6 +165,29 @@ class ConcertServiceTest {
         // verify
         then(concertRepository).should(never()).save(any());
         then(seatGradeRepository).should(never()).saveAll(anyList());
+    }
+
+    @Test
+    @DisplayName("[실패케이스 - DB 제약조건] 동시성 이슈로 seat_grade 유니크 제약조건 위반 시 DuplicateSeatGradeException 발생")
+    void create_fail_dbUniqueConstraint() {
+        // given
+        ConcertCreateRequest request = ConcertCreateRequest.builder()
+                .title("foo")
+                .startAt(now())
+                .venue("barr")
+                .seatGradeList(
+                        List.of(createSeatGradeRequest("VIP", 150000, 5))
+                )
+                .build();
+
+        given(concertRepository.save(any(Concert.class))).willReturn(createConcert(1L, "foo", now(), "barr"));
+
+        given(seatGradeRepository.saveAll(anyList()))
+                .willThrow(new DataIntegrityViolationException("UK_SEAT_GRADE 위반"));
+
+        // when & then
+        assertThatThrownBy(() -> concertService.create(request))
+                .isInstanceOf(DuplicateSeatGradeException.class);
     }
 
     /**
@@ -319,5 +339,13 @@ class ConcertServiceTest {
             ReflectionTestUtils.setField(concert, "id", id);
         }
         return concert;
+    }
+
+    private SeatGradeCreateRequest createSeatGradeRequest(String name, long price, int totalSeatCount) {
+        return SeatGradeCreateRequest.builder()
+                .name(name)
+                .price(BigDecimal.valueOf(price))
+                .totalSeatCount(totalSeatCount)
+                .build();
     }
 }
