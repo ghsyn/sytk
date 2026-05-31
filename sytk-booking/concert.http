@@ -1,4 +1,8 @@
-### 1-1. 공연 등록1
+### ==========================================
+### 1. 공연 등록 (POST)
+### ==========================================
+
+### 1-1. 공연 등록 (기본 정보만 등록)
 POST http://localhost:8080/api/v1/concert
 Content-Type: application/json
 
@@ -10,19 +14,14 @@ Content-Type: application/json
   "ticket_close_at": "2026-08-06T23:59:59+09:00"
 }
 
-### 1-2. 공연 등록2
-POST http://localhost:8080/api/v1/concert
-Content-Type: application/json
+> {%
+    client.test("공연 등록 성공 - 201 Created", function() {
+        client.assert(response.status === 201, "응답 코드가 201이 아닙니다.");
+    });
+%}
 
-{
-  "title": "[2026 신한 SOL KBO 리그] SSG랜더스 vs KIA 타이거즈",
-  "start_at": "2026-05-24T14:00:00+09:00",
-  "venue": "KIA 챔피언스필드",
-  "ticket_open_at": "2026-05-17T11:00:00+09:00",
-  "ticket_close_at": "2026-05-24T10:00:00+09:00"
-}
-
-### 1-3. 공연 등록3
+### 1-2. 공연 등록 (좌석 등급 목록 포함)
+# - seatGradeList 포함하여 넘기면 공연 & 좌석 등급 함께 생성
 POST http://localhost:8080/api/v1/concert
 Content-Type: application/json;charset=UTF-8
 
@@ -47,7 +46,13 @@ Content-Type: application/json;charset=UTF-8
   ]
 }
 
-### 1-4. 공연 등록 실패 케이스 (필수 값 누락)
+> {%
+    client.test("좌석 포함 공연 등록 성공 - 201 Created", function() {
+        client.assert(response.status === 201, "응답 코드가 201이 아닙니다.");
+    });
+%}
+
+### 1-3. 공연 등록 실패 (필수 값 누락 - Validation 에러)
 POST http://localhost:8080/api/v1/concert
 Content-Type: application/json
 
@@ -55,7 +60,47 @@ Content-Type: application/json
   "title": "공연 제목만 있는 잘못된 요청"
 }
 
-### 2. 공연 수정
+> {%
+    client.test("필수값 누락 실패 - 400 Bad Request", function() {
+        client.assert(response.status === 400, "응답 코드가 400이 아닙니다.");
+    });
+%}
+
+### 1-4. 공연 등록 실패 (동일 공연 내 좌석 등급명 중복 에러)
+# - 한 공연 내에 동일한 이름의 좌석 등급(예: VIP가 2개)이 존재하면 실패
+POST http://localhost:8080/api/v1/concert
+Content-Type: application/json
+
+{
+  "title": "중복 좌석 등급 테스트 공연",
+  "start_at": "2026-12-25T18:00:00+09:00",
+  "venue": "올림픽공원 체조경기장",
+  "seat_grade_list": [
+    {
+      "name": "VIP",
+      "price": 150000,
+      "total_seat_count": 50
+    },
+    {
+      "name": "VIP",
+      "price": 130000,
+      "total_seat_count": 30
+    }
+  ]
+}
+
+> {%
+    client.test("등급명 중복 실패 - 409 Conflict", function() {
+        client.assert(response.status === 409, "응답 코드가 409가 아닙니다.");
+    });
+%}
+
+### ==========================================
+### 2. 공연 수정 (PATCH)
+### ==========================================
+
+### 2-1. 공연 정보 수정
+# - 변경하고자 하는 필드만 부분적으로 요청 (CQRS 패턴에 의해 ID와 최소 정보만 반환)
 PATCH http://localhost:8080/api/v1/concert/1
 Content-Type: application/json
 
@@ -64,5 +109,34 @@ Content-Type: application/json
   "running_time" : 200
 }
 
-### 3. 공연 삭제
+> {%
+    client.test("공연 수정 성공 - 200 OK", function() {
+        client.assert(response.status === 200, "응답 코드가 200이 아닙니다.");
+    });
+%}
+
+### ==========================================
+### 3. 공연 삭제 (DELETE)
+### ==========================================
+
+### 3-1. 공연 등록
+POST http://localhost:8080/api/v1/concert
+Content-Type: application/json
+
+{
+  "title": "[2026 신한 SOL KBO 리그] SSG랜더스 vs KIA 타이거즈",
+  "start_at": "2026-05-24T14:00:00+09:00",
+  "venue": "KIA 챔피언스필드",
+  "ticket_open_at": "2026-05-17T11:00:00+09:00",
+  "ticket_close_at": "2026-05-24T10:00:00+09:00"
+}
+
+### 3-2. 공연 삭제
+# - 예매 내역이 존재하는 공연은 삭제할 수 없음 (비즈니스 정책 위반 시 400대 에러 발생)
 DELETE http://localhost:8080/api/v1/concert/3
+
+> {%
+    client.test("공연 삭제 성공 - 204 No Content", function() {
+        client.assert(response.status === 204, "응답 코드가 204가 아닙니다.");
+    });
+%}
