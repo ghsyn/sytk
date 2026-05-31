@@ -161,6 +161,36 @@ class ConcertControllerTest {
         then(concertService).should(never()).create(any());
     }
 
+    @Test
+    @DisplayName("[실패케이스 - 필드 유효성] 좌석 등급 필드 공백 시 INVALID_REQUEST 에러 발생")
+    void create_fail_seatGradeNameEmpty() throws Exception {
+        // given
+        SeatGradeCreateRequest invalidGrade = SeatGradeCreateRequest.builder()
+                .name(" ")
+                .price(BigDecimal.valueOf(10000))
+                .totalSeatCount(50)
+                .build();
+
+        ConcertCreateRequest request = ConcertCreateRequest.builder()
+                .title("foo")
+                .startAt(now())
+                .venue("barr")
+                .seatGradeList(List.of(invalidGrade))
+                .build();
+
+        // when & then
+        mockMvc.perform(post("/api/v1/concert")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(INVALID_REQUEST.getStatus().value()))
+                .andExpect(jsonPath("$.validation['seatGradeList[0].name']").value("등급명을 입력하세요."))
+                .andDo(print());
+
+        // verify
+        then(concertService).should(never()).create(any());
+    }
+
     /**
      * 공연 수정 테스트
      */

@@ -138,6 +138,38 @@ class ConcertServiceTest {
         then(concertRepository).should(never()).save(any());
     }
 
+    @Test
+    @DisplayName("[실패케이스 - 중복 검증] 하나의 공연 등록 요청 내에 중복된 좌석 등급명이 존재하면 DuplicateSeatGradeException 발생")
+    void create_fail_duplicateSeatGradeName() {
+        // given
+        SeatGradeCreateRequest grade1 = SeatGradeCreateRequest.builder()
+                .name("VIP")
+                .price(BigDecimal.valueOf(150000))
+                .totalSeatCount(100)
+                .build();
+
+        SeatGradeCreateRequest grade2 = SeatGradeCreateRequest.builder()
+                .name("VIP")
+                .price(BigDecimal.valueOf(120000))
+                .totalSeatCount(150)
+                .build();
+
+        ConcertCreateRequest request = ConcertCreateRequest.builder()
+                .title("foo")
+                .startAt(now())
+                .venue("barr")
+                .seatGradeList(List.of(grade1, grade2))
+                .build();
+
+        // when & then
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> concertService.create(request))
+                .isInstanceOf(DuplicateSeatGradeException.class);
+
+        // verify
+        then(concertRepository).should(never()).save(any());
+        then(seatGradeRepository).should(never()).saveAll(anyList());
+    }
+
     /**
      * 공연 수정 테스트
      */
