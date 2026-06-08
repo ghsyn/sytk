@@ -69,7 +69,7 @@ public class ConcertService {
                         .toList();
 
                 if (!seatList.isEmpty()) {
-                    seatRepository.saveAll(seatList);
+                    seatRepository.saveAll(seatList);   // 좌석 수 많은 경우 성능 테스트 필요 -> 성능 저하 시 하나의 쿼리로 묶어 던지도록 리팩토링 고려
                 }
             }
 
