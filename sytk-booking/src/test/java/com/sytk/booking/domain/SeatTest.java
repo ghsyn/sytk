@@ -102,19 +102,19 @@ class SeatTest {
             // given
             Seat seat = createSeat(current);
 
+            Runnable executor = switch (action) {
+                case "open" -> seat::open;
+                case "hold" -> seat::hold;
+                case "release" -> seat::release;
+                case "sell" -> seat::sell;
+                case "close" -> seat::close;
+                default -> throw new IllegalArgumentException("정의되지 않는 메서드: " + action);
+            };
+
             // when & then
-            assertThatThrownBy(() -> {
-                switch (action) {
-                    case "open" -> seat.open();
-                    case "hold" -> seat.hold();
-                    case "release" -> seat.release();
-                    case "sell" -> seat.sell();
-                    case "close" -> seat.close();
-                    default -> throw new IllegalArgumentException("정의되지 않는 메서드: " + action);
-                }
-            })
+            assertThatThrownBy(executor::run)
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining(String.format("좌석 상태를 %s에서 %s(으)로 변경할 수 없습니다.", fromDesc, toDesc));
+                    .hasMessage(String.format("현재 좌석 상태 %s에서 %s(으)로 변경할 수 없습니다.", fromDesc, toDesc));
         }
     }
 

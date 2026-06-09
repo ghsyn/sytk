@@ -22,9 +22,6 @@ public class Seat {
     @Column(nullable = false)
     private SeatStatus status = SeatStatus.CLOSED;
 
-    @Version
-    private Integer version;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_grade_id", nullable = false)
     private SeatGrade seatGrade;
@@ -39,37 +36,37 @@ public class Seat {
     // ==========================================
     // 상태 전이 비즈니스 메서드
     // ==========================================
-    private void changeStatus(SeatStatus next) {
-        if (!this.status.canChangeTo(next)) {
+    private void changeStatus(SeatStatus before, SeatStatus after) {
+        if (!this.status.equals(before) || !this.status.canChangeTo(after)) {
             throw new IllegalStateException(
-                    String.format("좌석 상태를 %s에서 %s로 변경할 수 없습니다.", this.status.getDescription(), next.getDescription())
+                    String.format("현재 좌석 상태 %s에서 %s(으)로 변경할 수 없습니다.", this.status.getDescription(), after.getDescription())
             );
         }
-        this.status = next;
+        this.status = after;
     }
 
     // 1. 개시(CLOSED -> AVAILABLE)
     public void open() {
-        changeStatus(SeatStatus.AVAILABLE);
+        changeStatus(SeatStatus.CLOSED, SeatStatus.AVAILABLE);
     }
 
     // 2. 선점(AVAILABLE -> OCCUPIED)
     public void hold() {
-        changeStatus(SeatStatus.OCCUPIED);
+        changeStatus(SeatStatus.AVAILABLE, SeatStatus.OCCUPIED);
     }
 
     // 3. 점유 해제(OCCUPIED -> AVAILABLE)
     public void release() {
-        changeStatus(SeatStatus.AVAILABLE);
+        changeStatus(SeatStatus.OCCUPIED, SeatStatus.AVAILABLE);
     }
 
     // 4. 결제 완료(OCCUPIED -> SOLD)
     public void sell() {
-        changeStatus(SeatStatus.SOLD);
+        changeStatus(SeatStatus.OCCUPIED, SeatStatus.SOLD);
     }
 
     // 5. 미판매(AVAILABLE -> CLOSED)
     public void close() {
-        changeStatus(SeatStatus.CLOSED);
+        changeStatus(SeatStatus.AVAILABLE, SeatStatus.CLOSED);
     }
 }
