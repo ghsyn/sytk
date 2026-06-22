@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CommonException.class)
     public ResponseEntity<ErrorResponse> commonExceptionHandler(CommonException e) {
         ErrorCode errorCode = e.getErrorCode();
-        ErrorResponse response = ErrorResponse.from(errorCode);
+        ErrorResponse response = ErrorResponse.from(e);
 
         return ResponseEntity.status(errorCode.getStatus()).body(response);
     }

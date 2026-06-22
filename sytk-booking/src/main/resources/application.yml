@@ -2,7 +2,7 @@ spring:
   application:
     name: sytk-booking
   jackson:
-    property-naming-strategy: SNAKE_CASE
+    property-naming-strategy: LOWER_CAMEL_CASE
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 

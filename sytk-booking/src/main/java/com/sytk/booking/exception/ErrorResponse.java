@@ -43,6 +43,21 @@ public record ErrorResponse(
     }
 
     /**
+     * 커스텀 메시지 에러용
+     */
+    public static ErrorResponse from(CommonException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        String message = e.getMessage();
+
+        return ErrorResponse.builder()
+                .status(errorCode.getStatus().value())
+                .message(message != null && !message.isBlank() ? message : errorCode.getMessage())
+                .timestamp(now())
+                .validation(Map.of())
+                .build();
+    }
+
+    /**
      * 검증 에러용(validationExceptionHandler)
      */
     public static ErrorResponse of(ErrorCode errorCode, BindingResult bindingResult) {

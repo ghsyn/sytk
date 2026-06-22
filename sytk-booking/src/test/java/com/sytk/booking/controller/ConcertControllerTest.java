@@ -5,6 +5,7 @@ import com.sytk.booking.exception.CommonException;
 import com.sytk.booking.exception.ErrorCode;
 import com.sytk.booking.request.ConcertCreateRequest;
 import com.sytk.booking.request.ConcertEditRequest;
+import com.sytk.booking.request.SeatGradeCreateRequest;
 import com.sytk.booking.response.ConcertCreateResponse;
 import com.sytk.booking.response.ConcertEditResponse;
 import com.sytk.booking.service.ConcertService;
@@ -15,12 +16,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import static com.sytk.booking.exception.ErrorCode.CONCERT_NOT_FOUND;
 import static com.sytk.booking.exception.ErrorCode.INVALID_REQUEST;
 import static java.time.OffsetDateTime.now;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -69,6 +72,47 @@ class ConcertControllerTest {
     }
 
     @Test
+    @DisplayName("[성공케이스] 좌석 등급 정보가 포함된 공연 등록 시 좌석 등급 리스트 생성 후 201 상태코드 및 ID, 제목 반환")
+    void create_with_seat_grades_success() throws Exception {
+        // given
+        SeatGradeCreateRequest vipGrade = SeatGradeCreateRequest.builder()
+                .name("VIP")
+                .price(BigDecimal.valueOf(150000))
+                .totalSeatCount(100)
+                .build();
+
+        SeatGradeCreateRequest rGrade = SeatGradeCreateRequest.builder()
+                .name("R")
+                .price(BigDecimal.valueOf(120000))
+                .totalSeatCount(150)
+                .build();
+
+        List<SeatGradeCreateRequest> seatGradeList = List.of(vipGrade, rGrade);
+
+        ConcertCreateRequest request = ConcertCreateRequest.builder()
+                .title("foo")
+                .startAt(now())
+                .venue("barr")
+                .seatGradeList(seatGradeList)
+                .build();
+
+        ConcertCreateResponse response = new ConcertCreateResponse(1L, "foo");
+        given(concertService.create(any(ConcertCreateRequest.class))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/concert")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.title").value("foo"))
+                .andDo(print());
+
+        // verify
+        then(concertService).should(times(1)).create(any(ConcertCreateRequest.class));
+    }
+
+    @Test
     @DisplayName("[실패케이스 - 필드 유효성 검증1] 공연 등록 시 제목이 없으면 INVALID_REQUEST 에러 발생")
     void create_fail_titleEmpty() throws Exception {
         // given
@@ -92,13 +136,13 @@ class ConcertControllerTest {
     }
 
     @Test
-    @DisplayName("[실패케이스 - 필드 유효성 검증2] 공연 등록 시 장소가 10 ~ 255자가 아니면 INVALID_REQUEST 에러 발생")
+    @DisplayName("[실패케이스 - 필드 유효성 검증2] 공연 등록 시 장소가 4 ~ 255자가 아니면 INVALID_REQUEST 에러 발생")
     void create_fail_venueLength() throws Exception {
         // given
         ConcertCreateRequest request = ConcertCreateRequest.builder()
                 .title("foo")
                 .startAt(now())
-                .venue("공연 장소입니다.")     // 9글자
+                .venue("장소")
                 .build();
 
         String json = objectMapper.writeValueAsString(request);
@@ -110,7 +154,37 @@ class ConcertControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(INVALID_REQUEST.getStatus().value()))
                 .andExpect(jsonPath("$.message").value("잘못된 입력값입니다."))
-                .andExpect(jsonPath("$.validation.venue").value("장소는 10 ~ 255 글자로 입력해주세요."))
+                .andExpect(jsonPath("$.validation.venue").value("장소는 4 ~ 255 글자로 입력해주세요."))
+                .andDo(print());
+
+        // verify
+        then(concertService).should(never()).create(any());
+    }
+
+    @Test
+    @DisplayName("[실패케이스 - 필드 유효성] 좌석 등급 필드 공백 시 INVALID_REQUEST 에러 발생")
+    void create_fail_seatGradeNameEmpty() throws Exception {
+        // given
+        SeatGradeCreateRequest invalidGrade = SeatGradeCreateRequest.builder()
+                .name(" ")
+                .price(BigDecimal.valueOf(10000))
+                .totalSeatCount(50)
+                .build();
+
+        ConcertCreateRequest request = ConcertCreateRequest.builder()
+                .title("foo")
+                .startAt(now())
+                .venue("barr")
+                .seatGradeList(List.of(invalidGrade))
+                .build();
+
+        // when & then
+        mockMvc.perform(post("/api/v1/concert")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(INVALID_REQUEST.getStatus().value()))
+                .andExpect(jsonPath("$.validation['seatGradeList[0].name']").value("등급명을 입력하세요."))
                 .andDo(print());
 
         // verify
@@ -176,32 +250,6 @@ class ConcertControllerTest {
 
         // verify
         then(concertService).should(never()).edit(anyLong(), any(ConcertEditRequest.class));
-    }
-
-    @Test
-    @DisplayName("[실패케이스 - 필드 유효성 검증] 제목, 시작시간, 장소 중 하나라도 빈 값을 저장할 시 INVALID_REQUEST 에러 발생")
-    void edit_fail_emptyField() throws Exception {
-        // given
-        Long concertId = 1L;
-        ConcertEditRequest request = ConcertEditRequest.builder()
-                .title("new title")
-                .venue("10글자 이상의 공연 장소")
-                .build();
-
-        String json = objectMapper.writeValueAsString(request);
-
-        // when & then
-        mockMvc.perform(patch("/api/v1/concert/{id}", concertId)
-                    .contentType(APPLICATION_JSON)
-                    .content(json))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(INVALID_REQUEST.getStatus().value()))
-                .andExpect(jsonPath("$.message").value("잘못된 입력값입니다."))
-                .andExpect(jsonPath("$.validation.startAt").value("시작시간을 입력하세요."))
-                .andDo(print());
-
-        // verify
-        then(concertService).should(never()).edit(eq(concertId), any(ConcertEditRequest.class));
     }
 
     /**

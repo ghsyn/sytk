@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://sytk-db:5432/sytk_dev}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/sytk_dev}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -16,7 +16,7 @@ spring:
 
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST:sytk-redis}
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
       port: 6379
 
 management:

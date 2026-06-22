@@ -1,9 +1,8 @@
 services:
-  # infra
-
   # 1. DB (PostgreSQL)
   sytk-db:
     image: postgres:15
+    profiles: ["infra"]
     container_name: sytk-postgres
     restart: always
     environment:
@@ -23,6 +22,7 @@ services:
   # 2. Cache 및 대기열 (Redis)
   sytk-redis:
     image: redis:7-alpine
+    profiles: ["infra"]
     container_name: sytk-redis
     restart: always
     ports:
@@ -36,6 +36,7 @@ services:
   # 3. 모듈 간 이벤트 전파 (Kafka)
   zookeeper:
     image: confluentinc/cp-zookeeper:${CONFLUENT_PLATFORM_VERSION:-7.7.8}
+    profiles: ["infra"]
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     healthcheck:
@@ -46,6 +47,7 @@ services:
 
   sytk-kafka:
     image: confluentinc/cp-kafka:${CONFLUENT_PLATFORM_VERSION:-7.7.8}
+    profiles: ["infra"]
     container_name: sytk-kafka
     depends_on:
       zookeeper:
@@ -65,8 +67,9 @@ services:
       timeout: 5s
       retries: 5
 
-  # application
+
   booking-service:
+    profiles: ["app"]
     build:
       context: .
       dockerfile: sytk-booking/Dockerfile
@@ -86,6 +89,7 @@ services:
       SPRING_DATA_REDIS_HOST: sytk-redis
 
   payment-service:
+    profiles: ["app"]
     build:
       context: .
       dockerfile: sytk-payment/Dockerfile
@@ -105,6 +109,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: sytk-kafka:29092
 
   read-service:
+    profiles: ["app"]
     build:
       context: .
       dockerfile: sytk-read/Dockerfile
@@ -127,6 +132,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: sytk-kafka:29092
 
   waiting-service:
+    profiles: ["app"]
     build:
       context: .
       dockerfile: sytk-waiting/Dockerfile
