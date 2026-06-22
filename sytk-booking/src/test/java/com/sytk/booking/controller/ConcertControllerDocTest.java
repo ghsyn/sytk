@@ -85,7 +85,6 @@ class ConcertControllerDocTest {
                                 fieldWithPath("ticketCloseAt").description("티켓 마감 시간 (ISO 8601 형식)").optional(),
                                 fieldWithPath("seatGradeList").description("좌석 등급 리스트").optional(),
 
-                                fieldWithPath("seatGradeList").description("좌석 등급 리스트"),
                                 fieldWithPath("seatGradeList[].name").description("좌석 등급명"),
                                 fieldWithPath("seatGradeList[].price").description("좌석 가격"),
                                 fieldWithPath("seatGradeList[].totalSeatCount").description("해당 등급의 총 좌석 수")
