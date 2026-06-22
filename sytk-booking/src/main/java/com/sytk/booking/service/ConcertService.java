@@ -75,11 +75,21 @@ public class ConcertService {
 
             return ConcertCreateResponse.from(concert);
 
-        } catch (DataIntegrityViolationException e) {   // 동시 동일한 공연, 좌석 등급 등록 상황에서 DB 유니크 제약 조건 위반 시 발생
-            if (e.getMessage().contains("seat_grade") || e.getMessage().contains("UK_SEAT_GRADE")) {
+        } catch (DataIntegrityViolationException e) {
+            String cause = String.valueOf(e.getMostSpecificCause()).toLowerCase();
+
+            // 좌석 등급 등록 상황에서 DB 유니크 제약 조건 위반 시 발생
+            if (cause.contains("seat_grade") || cause.contains("uk_seat_grade")) {
                 throw new DuplicateSeatGradeException();
             }
-            throw new DuplicateConcertException();
+
+            // 동시 동일한 공연 등록 상황에서 DB 유니크 제약 조건 위반 시 발생
+            if (cause.contains("concert") || cause.contains("title")) {
+                throw new DuplicateConcertException();
+            }
+
+            // 알 수 없는 무결성 오류는 상위 핸들러에서 처리
+            throw  e;
         }
     }
 

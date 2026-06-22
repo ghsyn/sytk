@@ -8,10 +8,10 @@ Content-Type: application/json
 
 {
   "title": "2026 인천펜타포트 락 페스티벌 with 국민은행",
-  "start_at": "2026-08-07T15:00:00+09:00",
+  "startAt": "2026-08-07T15:00:00+09:00",
   "venue": "송도달빛축제공원",
-  "ticket_open_at": "2026-06-01T14:00:00+09:00",
-  "ticket_close_at": "2026-08-06T23:59:59+09:00"
+  "ticketOpenAt": "2026-06-01T14:00:00+09:00",
+  "ticketCloseAt": "2026-08-06T23:59:59+09:00"
 }
 
 > {%
@@ -27,21 +27,21 @@ Content-Type: application/json;charset=UTF-8
 
 {
   "title": "뮤지컬 〈하데스타운〉 한국 공연",
-  "start_at": "2024-09-15T15:00:00+09:00",
-  "running_time": 155,
+  "startAt": "2024-09-15T15:00:00+09:00",
+  "runningTime": 155,
   "venue": "샤롯데씨어터",
-  "ticket_open_at": "2024-08-08T14:00:00+09:00",
-  "ticket_close_at": "2024-09-15T14:59:59+09:00",
-  "seat_grade_list":[
+  "ticketOpenAt": "2024-08-08T14:00:00+09:00",
+  "ticketCloseAt": "2024-09-15T14:59:59+09:00",
+  "seatGradeList":[
     {
       "name":"VIP",
       "price":150000,
-      "total_seat_count":100
+      "totalSeatCount":100
     },
     {
       "name":"R",
       "price":120000,
-      "total_seat_count":150
+      "totalSeatCount":150
     }
   ]
 }
@@ -73,18 +73,18 @@ Content-Type: application/json
 
 {
   "title": "중복 좌석 등급 테스트 공연",
-  "start_at": "2026-12-25T18:00:00+09:00",
+  "startAt": "2026-12-25T18:00:00+09:00",
   "venue": "올림픽공원 체조경기장",
-  "seat_grade_list": [
+  "seatGradeList": [
     {
       "name": "VIP",
       "price": 150000,
-      "total_seat_count": 50
+      "totalSeatCount": 50
     },
     {
       "name": "VIP",
       "price": 130000,
-      "total_seat_count": 30
+      "totalSeatCount": 30
     }
   ]
 }
@@ -106,7 +106,7 @@ Content-Type: application/json
 
 {
   "title" : "2026 인천펜타포트 락 페스티벌 with 국민은행",
-  "running_time" : 200
+  "runningTime" : 200
 }
 
 > {%
@@ -125,10 +125,10 @@ Content-Type: application/json
 
 {
   "title": "[2026 신한 SOL KBO 리그] SSG랜더스 vs KIA 타이거즈",
-  "start_at": "2026-05-24T14:00:00+09:00",
+  "startAt": "2026-05-24T14:00:00+09:00",
   "venue": "KIA 챔피언스필드",
-  "ticket_open_at": "2026-05-17T11:00:00+09:00",
-  "ticket_close_at": "2026-05-24T10:00:00+09:00"
+  "ticketOpenAt": "2026-05-17T11:00:00+09:00",
+  "ticketCloseAt": "2026-05-24T10:00:00+09:00"
 }
 
 ### 3-2. 공연 삭제

@@ -1,15 +1,19 @@
 package com.sytk.booking.domain;
 
+import com.sytk.booking.exception.InvalidSeatStatusTransitionException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@ExtendWith(MockitoExtension.class)
 class SeatTest {
 
     @Mock
@@ -89,7 +93,7 @@ class SeatTest {
     @DisplayName("상태 전이 실패케이스")
     class failureCases {
 
-        @ParameterizedTest(name = "{0} 상태에서 {1} 시도할 경우 IllegalStateException 발생")
+        @ParameterizedTest(name = "{0} 상태에서 {1} 시도할 경우 InvalidSeatStatusTransitionException 발생")
         @CsvSource({
                 "OCCUPIED, open, 선점, 예약 가능",
                 "CLOSED, hold, 미판매, 선점",
@@ -113,7 +117,7 @@ class SeatTest {
 
             // when & then
             assertThatThrownBy(executor::run)
-                    .isInstanceOf(IllegalStateException.class)
+                    .isInstanceOf(InvalidSeatStatusTransitionException.class)
                     .hasMessage(String.format("현재 좌석 상태 %s에서 %s(으)로 변경할 수 없습니다.", fromDesc, toDesc));
         }
     }

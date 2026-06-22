@@ -70,15 +70,25 @@ public class Concert {
     }
 
     private void validate() {
+        if (this.title == null || this.title.isBlank()) {
+            throw new InvalidRequestException();
+        }
+        if (this.startAt == null) {
+            throw new InvalidRequestException();
+        }
+        if (this.venue == null || this.venue.isBlank()) {
+            throw new InvalidRequestException();
+        }
+
         // 1. 티켓 오픈 시간은 마감 시간보다 빨라야 합니다.
         if (this.ticketOpenAt != null && this.ticketCloseAt != null &&
-                this.ticketOpenAt.isAfter(this.ticketCloseAt)) {
+                !this.ticketOpenAt.isBefore(this.ticketCloseAt)) {
             throw new InvalidRequestException();
         }
 
         // 2. 티켓 예매 마감 시간은 공연 시작 시간보다 빨라야 합니다.
-        if (this.ticketCloseAt != null && this.startAt != null &&
-                this.ticketCloseAt.isAfter(this.startAt)) {
+        if (this.ticketCloseAt != null &&
+                !this.ticketCloseAt.isBefore(this.startAt)) {
             throw new InvalidRequestException();
         }
     }

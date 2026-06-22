@@ -35,6 +35,10 @@ public class SeatGrade {
 
     @Builder
     public SeatGrade(String name, BigDecimal price, Integer totalSeatCount, Concert concert) {
+        if (totalSeatCount == null || totalSeatCount < 1) {
+            throw new IllegalArgumentException("좌석 등급의 총 좌석 수는 1 이상이어야 합니다.");
+        }
+
         this.concert = concert;
         this.name = name;
         this.price = price;
@@ -42,7 +46,7 @@ public class SeatGrade {
     }
 
     public List<Seat> createSeats() {
-        List<Seat> seatList = new ArrayList<>();
+        List<Seat> seatList = new ArrayList<>(this.totalSeatCount);
 
         for (int i = 0; i < this.totalSeatCount; i++) {
             seatList.add(Seat.builder()

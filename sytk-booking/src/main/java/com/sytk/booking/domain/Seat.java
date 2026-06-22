@@ -1,5 +1,6 @@
 package com.sytk.booking.domain;
 
+import com.sytk.booking.exception.InvalidSeatStatusTransitionException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -28,6 +29,12 @@ public class Seat {
 
     @Builder
     public Seat(SeatGrade seatGrade, Integer number, SeatStatus status) {
+        if (seatGrade == null) {
+            throw new IllegalArgumentException("좌석 등급은 필수입니다.");
+        }
+        if (number == null || number < 1) {
+            throw new IllegalArgumentException("좌석 번호는 1 이상이어야 합니다.");
+        }
         this.seatGrade = seatGrade;
         this.number = number;
         this.status = (status != null) ? status : SeatStatus.CLOSED;
@@ -38,9 +45,7 @@ public class Seat {
     // ==========================================
     private void changeStatus(SeatStatus before, SeatStatus after) {
         if (!this.status.equals(before) || !this.status.canChangeTo(after)) {
-            throw new IllegalStateException(
-                    String.format("현재 좌석 상태 %s에서 %s(으)로 변경할 수 없습니다.", this.status.getDescription(), after.getDescription())
-            );
+            throw new InvalidSeatStatusTransitionException(this.status, after);
         }
         this.status = after;
     }

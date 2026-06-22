@@ -18,7 +18,10 @@ public enum ErrorCode {
     RESERVED_CONCERT(HttpStatus.CONFLICT, "예매된 내역이 있어 삭제할 수 없습니다."),
 
     // SeatGrade
-    DUPLICATE_SEAT_GRADE(HttpStatus.CONFLICT,"좌석 등급명은 중복될 수 없습니다.");
+    DUPLICATE_SEAT_GRADE(HttpStatus.CONFLICT,"좌석 등급명은 중복될 수 없습니다."),
+
+    // SeatStatus
+    INVALID_SEAT_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "변경할 수 없는 좌석 상태입니다.");
 
     private final HttpStatus status;
     private final String message;
