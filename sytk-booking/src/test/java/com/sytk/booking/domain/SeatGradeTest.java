@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SeatGradeTest {
 
@@ -31,19 +32,17 @@ class SeatGradeTest {
     }
 
     @Test
-    @DisplayName("[성공케이스 - 경계값 테스트] totalSeatCount가 0일 경우 빈 좌석 리스트 반환")
+    @DisplayName("[실패케이스 - 경계값 테스트] totalSeatCount가 0일 경우 IllegalArgumentException 반환")
     void createSeats_zero_count_success() {
         // given
-        SeatGrade seatGrade = SeatGrade.builder()
+        SeatGrade.SeatGradeBuilder seatGradeBuilder = SeatGrade.builder()
                     .name("VIP")
                 .price(BigDecimal.valueOf(150000))
-                .totalSeatCount(0)
-                .build();
+                .totalSeatCount(0);
 
-        // when
-        List<Seat> seatList = seatGrade.createSeats();
-
-        // then
-        assertThat(seatList).isEmpty();
+        // when & then
+        assertThatThrownBy(seatGradeBuilder::build)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("좌석 등급의 총 좌석 수는 1 이상이어야 합니다.");
     }
 }
