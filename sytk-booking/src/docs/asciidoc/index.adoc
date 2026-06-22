@@ -1,1 +1,54 @@
 = Sytk Booking API Doc
+:source-highlighter: highlightjs
+:toc: left
+:toc-title: Sytk Booking API
+:toclevels: 2
+:sectnums:
+:docinfo: shared
+
+== Concert API
+
+공연 도메인의 생성, 수정, 삭제를 담당하는 Command API입니다.
+
+=== 1. 공연 등록
+`POST /api/v1/concert`
+
+==== Request HTTP
+include::{snippets}/concert-create/http-request.adoc[]
+==== Request Fields
+include::{snippets}/concert-create/request-fields.adoc[]
+==== Response HTTP
+include::{snippets}/concert-create/http-response.adoc[]
+==== Response Fields
+include::{snippets}/concert-create/response-fields.adoc[]
+
+---
+
+=== 2. 공연 수정
+`PATCH /api/v1/concert/{id}`
+
+- 명령(Command)과 조회(Query)의 결합도를 낮추기 위해 수정 완료 후 최소한의 식별 정보만 반환합니다.
+- PATCH를 사용하여 리소스의 일부만 변경합니다.
+
+==== Path Parameters
+include::{snippets}/concert-edit/path-parameters.adoc[]
+==== Request HTTP
+include::{snippets}/concert-edit/http-request.adoc[]
+==== Request Fields
+include::{snippets}/concert-edit/request-fields.adoc[]
+==== Response HTTP
+include::{snippets}/concert-edit/http-response.adoc[]
+==== Response Fields
+include::{snippets}/concert-edit/response-fields.adoc[]
+
+---
+
+=== 3. 공연 삭제
+`DELETE /api/v1/concert/{id}`
+
+==== Path Parameters
+include::{snippets}/concert-delete/path-parameters.adoc[]
+==== Request HTTP
+include::{snippets}/concert-delete/http-request.adoc[]
+==== Response HTTP
+include::{snippets}/concert-delete/http-response.adoc[]
