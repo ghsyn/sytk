@@ -59,7 +59,7 @@ class ConcertServiceTest {
         assertThatThrownBy(() -> concertService.getDetails(1L))
                 .isInstanceOf(ConcertNotFoundException.class);
 
-        // then
+        // verify
         verify(concertRepository).findById(1L);
     }
 
