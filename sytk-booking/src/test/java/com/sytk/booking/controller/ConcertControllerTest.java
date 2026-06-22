@@ -55,7 +55,10 @@ class ConcertControllerTest {
                 .venue("barrrrrrrr")
                 .build();
 
-        ConcertCreateResponse response = new ConcertCreateResponse(1L, "foo");
+        ConcertCreateResponse response = ConcertCreateResponse.builder()
+                .id(1L)
+                .title("foo")
+                .build();
         given(concertService.create(any(ConcertCreateRequest.class))).willReturn(response);
 
         // when & then
@@ -96,7 +99,10 @@ class ConcertControllerTest {
                 .seatGradeList(seatGradeList)
                 .build();
 
-        ConcertCreateResponse response = new ConcertCreateResponse(1L, "foo");
+        ConcertCreateResponse response = ConcertCreateResponse.builder()
+                .id(1L)
+                .title("foo")
+                .build();
         given(concertService.create(any(ConcertCreateRequest.class))).willReturn(response);
 
         // when & then
@@ -210,8 +216,7 @@ class ConcertControllerTest {
                         .title("new title")
                         .build();
 
-        given(concertService.edit(eq(concertId), any(ConcertEditRequest.class)))
-                .willReturn(response);
+        given(concertService.edit(eq(concertId), any(ConcertEditRequest.class))).willReturn(response);
 
         // when & then
         mockMvc.perform(patch("/api/v1/concert/{id}", concertId)

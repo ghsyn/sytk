@@ -2,12 +2,14 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.6' apply false
     id 'io.spring.dependency-management' version '1.1.7' apply false
+    id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'org.asciidoctor.jvm.convert'
 
     group = 'com.sytk'
     version = '0.0.1-SNAPSHOT'
@@ -23,10 +25,17 @@ subprojects {
         mavenCentral()
     }
 
+    ext {
+        asciidocVersion = "3.0.5"
+        // snippet 생성 경로
+        snippetsDir = file('build/generated-snippets')
+    }
+
     configurations {
         compileOnly {
             extendsFrom annotationProcessor // 모듈별로 필요에 따라 사용
         }
+        asciidoctorExt
     }
 
     dependencies {
@@ -39,15 +48,39 @@ subprojects {
         // Test
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+        // REST Docs
+        testImplementation "org.springframework.restdocs:spring-restdocs-mockmvc:${asciidocVersion}"
+        asciidoctorExt "org.springframework.restdocs:spring-restdocs-asciidoctor:${asciidocVersion}"
     }
 
     test {
         useJUnitPlatform()
+        outputs.dir snippetsDir
 
         testLogging {
             events "passed", "skipped", "failed"
             displayGranularity = 2
             showStandardStreams = true
+        }
+    }
+
+    asciidoctor {
+        configurations 'asciidoctorExt'
+        inputs.dir snippetsDir
+        dependsOn test
+    }
+
+    bootJar {
+        dependsOn asciidoctor
+
+//        copy {
+//            from asciidoctor.outputDir
+//            into "src/main/resources/static/docs"
+//        }
+
+        from("${asciidoctor.outputDir}") {
+            into 'static/docs'
         }
     }
 }
