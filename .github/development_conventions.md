@@ -32,7 +32,7 @@
   ```text
     Merge pull request(#pr-number): `main` ← `병합할 브랜치명`
     
-    - PR title (#issue-number) ex) [FEAT] 핵심 비즈니스 도메인 모델링 (#1)
+    [TYPE] PR 제목 (#issue-number) (#pr-number) ex) [FEAT] 핵심 비즈니스 도메인 모델링 (#1) (#2)
   ```
 
 ## 3. Commit Message Convention
