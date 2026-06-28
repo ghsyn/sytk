@@ -13,14 +13,14 @@
 5. [핵심 설계 결정](#5-핵심-설계-결정)
 6. [비즈니스 흐름](#6-비즈니스-흐름)
 7. [프로젝트 구조 및 실행](#7-프로젝트-구조-및-실행)
-8. [도전 과제, 트러블 슈팅, 성과](#8-도전-과제,-트러블-슈팅,-성과)
+8. [도전 과제, 트러블 슈팅, 성과](#8-도전-과제-트러블-슈팅-성과)
 
 ---
 
 ## 1. 프로젝트 개요
 
 티켓팅 서비스는 예매 오픈 직후 찰나의 순간에 수만 명의 트래픽이 몰리는 극단적인 특수성을 가집니다.  
-SYTK는 이 문제에 정면으로 대응하는 것을 목표로 설계했습니다.
+이 문제에 정면으로 대응하는 것을 목표로 SYTK를 설계했습니다.
 
 **핵심 기술 과제**
 
@@ -42,7 +42,7 @@ SYTK는 이 문제에 정면으로 대응하는 것을 목표로 설계했습니
 | ORM / Query | Spring Data JPA, QueryDSL | 복잡한 동적 쿼리를 타입 안전하게 작성 |
 | Database | PostgreSQL (Master / Replica) | ACID 보장 + Replica로 읽기 부하 분산 |
 | Cache / Message | Redis (Sorted Set · Cache), Kafka | 대기열·캐시는 Redis, 모듈 간 이벤트 전파는 Kafka로 역할 분리 |
-| Concurrency | Redisson · JPA `@Version` · `SELECT FOR UPDATE` | 충돌 특성별 최적 락 전략 적용 ([5-5 참고](##5-5-상황별-동시성-제어-전략)) |
+| Concurrency | Redisson · JPA `@Version` · `SELECT FOR UPDATE` | 충돌 특성별 최적 락 전략 적용 ([5-5 참고](#5-5-상황별-동시성-제어-전략)) |
 | Test | JUnit 5, AssertJ, BDDMockito, Testcontainers | 실제 DB/Redis 컨테이너 기반 동시성 통합 테스트 |
 | Documentation | Spring REST Docs | 테스트 통과 시에만 문서 생성 (코드와 문서 간 항상 일치 보장) |
 | Build / Infra | Gradle Multi-Module, Docker Compose, GitHub Actions | 모듈별 독립 빌드 + CI/CD 자동화 |
@@ -88,6 +88,17 @@ SYTK는 이 문제에 정면으로 대응하는 것을 목표로 설계했습니
 
 ### 1) sytk-booking — _비즈니스의 심장_
 
+**좌석 상태 전이**
+
+```
+CLOSED ←→ AVAILABLE → OCCUPIED → SOLD
+               ↑       ↓
+               AVAILABLE (취소/만료)
+```
+상태 전이는 반드시 `SeatStatus.canChangeTo()` 검증 후 `Seat.changeStatus()`로만 위임됩니다.
+
+**동시성 제어**
+
 티켓팅 핵심 로직인 좌석 선점과 예매 상태 관리를 담당합니다.  
 **충돌 특성에 따라 락 전략을 3가지로 분리**했습니다. ([5-5 참고](#5-5-상황별-동시성-제어-전략))
 
@@ -101,14 +112,6 @@ SYTK는 이 문제에 정면으로 대응하는 것을 목표로 설계했습니
 - 좌석 상태 머신 `CLOSED → AVAILABLE → OCCUPIED → SOLD` 도메인 수준에서 강제
 - 미결제 선점 좌석은 스케줄러가 주기적으로 회수 (2차 방어)
 - CQRS Command side 담당 (조회 로직 작성 금지)
-
-**좌석 상태 전이**
-```
-CLOSED ←→ AVAILABLE → OCCUPIED → SOLD
-               ↑       ↓
-               AVAILABLE (취소/만료)
-```
-상태 전이는 반드시 `SeatStatus.canChangeTo()` 검증 후 `Seat.changeStatus()`로만 위임됩니다.
 
 ### 2) sytk-payment — _신뢰할 수 있는 결제와 복구_
 
