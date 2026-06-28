@@ -20,8 +20,13 @@ public enum ErrorCode {
     // SeatGrade
     DUPLICATE_SEAT_GRADE(HttpStatus.CONFLICT,"좌석 등급명은 중복될 수 없습니다."),
 
-    // SeatStatus
-    INVALID_SEAT_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "변경할 수 없는 좌석 상태입니다.");
+    // Seat
+    SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "좌석을 찾을 수 없습니다."),
+    INVALID_SEAT_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "변경할 수 없는 좌석 상태입니다."),
+
+    // Reservation
+    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예매 내역을 찾을 수 없습니다."),
+    INVALID_RESERVATION_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "변경할 수 없는 예매 상태입니다.");
 
     private final HttpStatus status;
     private final String message;
