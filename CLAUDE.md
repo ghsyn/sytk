@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 1. Java & General Standards
 - **Record 사용**: DTO, API 요청/응답 바디, 단순 데이터 캐리어 역할을 하는 객체는 되도록 클래스가 아닌 `record`로 작성합니다.
-- **Builder Pattern**: `@NoArgsConstructor(access = PROTECTED)` + `@Builder` 조합을 사용합니다. (생성자 파라미터가 3개 이상인 경우엔 특히 필수) 단, 엔티티 내부에서 상태를 변경하는 비즈니스 메서드에는 `..Builder`보다 명확한 명칭의 전용 메서드를 사용해야 합니다.
+- **Builder Pattern**: `@NoArgsConstructor(access = PROTECTED)` + `@Builder` 조합을 사용합니다. 단, 엔티티 내부에서 상태를 변경하는 비즈니스 메서드에는 `..Builder`보다 명확한 명칭의 전용 메서드를 사용해야 합니다.
 - **Editor 패턴 (부분 수정)**: PATCH 엔드포인트 등에서 `null` 덮어쓰기를 방지하기 위해 엔티티가 `toEditor()`로 현재 값이 채워진 빌더(Editor)를 반환합니다. 서비스는 변경된 필드만 반영 후 `entity.edit(editor)`를 호출합니다. (`Concert` / `ConcertEditor` 구조 참고)
 - **Exception Handling**: 모든 비즈니스 예외는 `CommonException`을 상속받아야 하며, `ErrorCode` enum(`HttpStatus` + 한국어 메시지)을 보유합니다. 전역 예외 핸들러(`GlobalExceptionHandler`)가 이를 공통 `ErrorResponse` 형식으로 변환합니다. 새 에러 코드는 `ErrorCode`에 추가합니다.
 
@@ -134,10 +134,15 @@ docker compose -f docker-compose-dev.yml --profile app up -d
 
 ### 테스트 가이드라인
 
+- **TDD**: 프로덕션 코드보다 테스트를 먼저 작성합니다 (Red → Green → Refactor).  
+  - 테스트 메서드는 `given-when-then` 주석으로 구조를 명시합니다.
+  - 동일 로직을 여러 입력에 대해 검증할 때는 `for`문 대신 `@ParameterizedTest` + `@EnumSource`/`@CsvSource`를 우선 사용합니다. 실패 시 어떤 입력값에서 실패했는지 리포트에 드러나야 하기 때문입니다.
+  - `@DisplayName`은 "무엇을 검증하는지"가 아니라 "어떤 상태에서 어떤 결과가 나와야 하는지"를 한국어로 명확히 씁니다.
+  - 도메인 규칙이 변경되면 관련 테스트를 함께 수정하고, 새로 추가된 enum 값이나 필드가 기존 파라미터화 테스트(`CsvSource` 등)에서 누락되지 않았는지 확인합니다.
 - **단위 테스트**: JUnit 5 + AssertJ + BDDMockito 구조를 사용합니다.
 - **명명 규칙**: 가독성을 위해 모든 테스트 메서드에는 `@DisplayName`을 사용하여 테스트 메서 명을 한국어로 상세하게 기술합니다.
 - **컨트롤러 테스트**: `@WebMvcTest` + `@MockitoBean`을 사용하여 서비스 레이어를 모킹합니다.
-- **동시성 통합 테스트**: Testcontainers를 사용하여 실제 PostgreSQL/Redis 컨테이너 기반의 동시성 통합 테스트(예: 1,000명 동시 좌석 선점 시나리오)를 작성합니다.
+- **동시성 통합 테스트**: `Testcontainers`를 사용하여 실제 PostgreSQL/Redis 컨테이너 기반의 동시성 통합 테스트(예: 1,000명 동시 좌석 선점 시나리오)를 작성합니다.
 
 ### Spring REST Docs 작성
 

@@ -82,4 +82,9 @@ public class Reservation {
     public void expire() {
         changeStatus(ReservationStatus.EXPIRED);
     }
+
+    // 환불 (CONFIRMED → REFUNDED)
+    public void refund() {
+        changeStatus(ReservationStatus.REFUNDED);
+    }
 }

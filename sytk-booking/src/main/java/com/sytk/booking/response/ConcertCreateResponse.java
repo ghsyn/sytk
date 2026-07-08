@@ -4,7 +4,7 @@ import com.sytk.booking.domain.Concert;
 import lombok.Builder;
 
 /**
- * 공연 등록 응답 DTO record
+ * 공연 등록 응답 DTO
  */
 @Builder
 public record ConcertCreateResponse(

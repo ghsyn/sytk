@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
- * 공연 등록 dto
+ * 공연 등록 요청 DTO
  */
 @Builder
 @ValidTicketTime

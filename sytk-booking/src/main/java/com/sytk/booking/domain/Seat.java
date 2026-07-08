@@ -50,27 +50,32 @@ public class Seat {
         this.status = after;
     }
 
-    // 1. 개시(CLOSED -> AVAILABLE)
+    // 개시(CLOSED -> AVAILABLE)
     public void open() {
         changeStatus(SeatStatus.CLOSED, SeatStatus.AVAILABLE);
     }
 
-    // 2. 선점(AVAILABLE -> OCCUPIED)
+    // 선점(AVAILABLE -> OCCUPIED)
     public void hold() {
         changeStatus(SeatStatus.AVAILABLE, SeatStatus.OCCUPIED);
     }
 
-    // 3. 점유 해제(OCCUPIED -> AVAILABLE)
+    // 점유 해제(OCCUPIED -> AVAILABLE)
     public void release() {
         changeStatus(SeatStatus.OCCUPIED, SeatStatus.AVAILABLE);
     }
 
-    // 4. 결제 완료(OCCUPIED -> SOLD)
+    // 결제 완료(OCCUPIED -> SOLD)
     public void sell() {
         changeStatus(SeatStatus.OCCUPIED, SeatStatus.SOLD);
     }
 
-    // 5. 미판매(AVAILABLE -> CLOSED)
+    // 좌석 환불(SOLD -> AVAILABLE)
+    public void refund() {
+        changeStatus(SeatStatus.SOLD, SeatStatus.AVAILABLE);
+    }
+
+    // 미판매(AVAILABLE -> CLOSED)
     public void close() {
         changeStatus(SeatStatus.AVAILABLE, SeatStatus.CLOSED);
     }
