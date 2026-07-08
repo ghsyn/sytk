@@ -8,8 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.OffsetDateTime;
-
+import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -20,17 +19,18 @@ class ReservationTest {
     private Seat seat;
 
     @Nested
-    @DisplayName("예매 생성")
+    @DisplayName("초기 유효성 검증")
     class Create {
 
         @Test
         @DisplayName("[성공케이스] 유효한 유저 ID와 좌석으로 예매 생성 시 RESERVING 상태로 초기화")
         void create_success() {
             // when
-            Reservation reservation = createReservation(OffsetDateTime.now().plusMinutes(10));
+            Reservation reservation = createReservation();
 
             // then
             assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVING);
+            assertThat(reservation.getExpiredAt()).isBefore(now());
         }
 
         @Test
@@ -40,7 +40,6 @@ class ReservationTest {
             assertThatThrownBy(() -> Reservation.builder()
                     .userId(null)
                     .seat(seat)
-                    .expiredAt(OffsetDateTime.now().plusMinutes(10))
                     .build())
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("유저 ID는 필수입니다.");
@@ -53,23 +52,9 @@ class ReservationTest {
             assertThatThrownBy(() -> Reservation.builder()
                     .userId(1L)
                     .seat(null)
-                    .expiredAt(OffsetDateTime.now().plusMinutes(10))
                     .build())
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("좌석은 필수입니다.");
-        }
-
-        @Test
-        @DisplayName("[실패케이스] expiredAt이 null이면 IllegalArgumentException 예외 발생")
-        void create_fail_nullExpiredAt() {
-            // when & then
-            assertThatThrownBy(() -> Reservation.builder()
-                    .userId(1L)
-                    .seat(seat)
-                    .expiredAt(null)
-                    .build())
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("만료 시간은 필수입니다.");
         }
     }
 
@@ -81,7 +66,7 @@ class ReservationTest {
         @DisplayName("[성공케이스] 대기 상태에서 결제 완료 시 확정 상태로 변경")
         void confirm_success() {
             // given
-            Reservation reservation = createReservation(OffsetDateTime.now().plusMinutes(10));
+            Reservation reservation = createReservation();
 
             // when
             reservation.confirm();
@@ -94,7 +79,7 @@ class ReservationTest {
         @DisplayName("[성공케이스] 대기 상태에서 예매 취소 시 취소 상태로 변경")
         void cancel_success() {
             // given
-            Reservation reservation = createReservation(OffsetDateTime.now().plusMinutes(10));
+            Reservation reservation = createReservation();
 
             // when
             reservation.cancel();
@@ -107,13 +92,27 @@ class ReservationTest {
         @DisplayName("[성공케이스] 대기 상태에서 점유 만료 시 만료 상태로 변경")
         void expire_success() {
             // given
-            Reservation reservation = createReservation(OffsetDateTime.now().plusMinutes(10));
+            Reservation reservation = createReservation();
 
             // when
             reservation.expire();
 
             // then
             assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.EXPIRED);
+        }
+
+        @Test
+        @DisplayName("[성공케이스] 확정 상태에서 예매 환불 시 환불 상태로 변경")
+        void refund_success() {
+            // given
+            Reservation reservation = createReservation();
+            reservation.confirm();
+
+            // when
+            reservation.refund();
+
+            // then
+            assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.REFUNDED);
         }
     }
 
@@ -125,7 +124,7 @@ class ReservationTest {
         @DisplayName("[실패케이스] 이미 확정된 예매를 재확정하려 하면 InvalidReservationStatusTransitionException 예외 발생")
         void confirm_fail_alreadyConfirmed() {
             // given
-            Reservation reservation = createReservation(OffsetDateTime.now().plusMinutes(10));
+            Reservation reservation = createReservation();
             reservation.confirm();
 
             // when & then
@@ -137,7 +136,7 @@ class ReservationTest {
         @DisplayName("[실패케이스] 취소된 예매를 취소하려 하면 InvalidReservationStatusTransitionException 예외 발생")
         void cancel_fail_alreadyCanceled() {
             // given
-            Reservation reservation = createReservation(OffsetDateTime.now().plusMinutes(10));
+            Reservation reservation = createReservation();
             reservation.cancel();
 
             // when & then
@@ -147,13 +146,24 @@ class ReservationTest {
 
         @Test
         @DisplayName("[실패케이스] 만료된 예매를 확정하려 하면 InvalidReservationStatusTransitionException 예외 발생")
-        void confirm_fail_alreadyExpired() {
+        void expire_fail_alreadyExpired() {
             // given
-            Reservation reservation = createReservation(OffsetDateTime.now().plusMinutes(10));
+            Reservation reservation = createReservation();
             reservation.expire();
 
             // when & then
             assertThatThrownBy(reservation::confirm)
+                    .isInstanceOf(InvalidReservationStatusTransitionException.class);
+        }
+
+        @Test
+        @DisplayName("[실패케이스] 환불된 예매를 환불하려 하면 InvalidReservationStatusTransitionException 예외 발생")
+        void refund_fail_alreadyRefunded() {
+            // given
+            Reservation reservation = createReservation();
+
+            // when & then
+            assertThatThrownBy(reservation::refund)
                     .isInstanceOf(InvalidReservationStatusTransitionException.class);
         }
     }
@@ -163,34 +173,33 @@ class ReservationTest {
     class IsExpired {
 
         @Test
-        @DisplayName("[성공케이스] 만료 시간이 현재 시간보다 과거이면 만료된 예매로 판단")
+        @DisplayName("[성공케이스] 현재 시간이 만료 시간과 같거나 보다 미래이면 만료된 예매로 판단")
         void isExpired_true() {
             // given
-            Reservation reservation = createReservation(OffsetDateTime.now().minusSeconds(1));
+            Reservation reservation = createReservation();
 
             // when & then
-            assertThat(reservation.isExpiredAt(OffsetDateTime.now())).isTrue();
+            assertThat(reservation.isExpired(now())).isTrue();
         }
 
         @Test
-        @DisplayName("[성공케이스] 만료 시간이 현재 시간보다 미래이면 유효한 예매로 판단")
+        @DisplayName("[성공케이스] 현재 시간이 만료 시간보다 과거이면 유효한 예매로 판단")
         void isExpired_false() {
             // given
-            Reservation reservation = createReservation(OffsetDateTime.now().plusMinutes(10));
+            Reservation reservation = createReservation();
 
             // when & then
-            assertThat(reservation.isExpiredAt(OffsetDateTime.now())).isFalse();
+            assertThat(reservation.isExpired(now().minusMinutes(10))).isFalse();
         }
     }
 
     /**
      * Helper Method
      */
-    private Reservation createReservation(OffsetDateTime expiredAt) {
+    private Reservation createReservation() {
         return Reservation.builder()
                 .userId(1L)
                 .seat(seat)
-                .expiredAt(expiredAt)
                 .build();
     }
 }

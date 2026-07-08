@@ -10,6 +10,8 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.OffsetDateTime;
 
+import static java.time.OffsetDateTime.now;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,24 +40,23 @@ public class Reservation {
     private Long version;
 
     @Builder
-    public Reservation(Long userId, Seat seat, OffsetDateTime expiredAt) {
+    public Reservation(Long userId, Seat seat) {
+
         if (userId == null) {
             throw new IllegalArgumentException("유저 ID는 필수입니다.");
         }
         if (seat == null) {
             throw new IllegalArgumentException("좌석은 필수입니다.");
         }
-        if (expiredAt == null) {
-            throw new IllegalArgumentException("만료 시간은 필수입니다.");
-        }
+
+        this.status = ReservationStatus.RESERVING;
+        this.expiredAt = now();
         this.userId = userId;
         this.seat = seat;
-        this.expiredAt = expiredAt;
-        this.status = ReservationStatus.RESERVING;
     }
 
-    public boolean isExpiredAt(OffsetDateTime now) {
-        return this.expiredAt.isBefore(now);
+    public boolean isExpired(OffsetDateTime currentTime) {
+        return !currentTime.isBefore(this.expiredAt);
     }
 
     // ==========================================
