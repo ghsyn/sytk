@@ -76,6 +76,19 @@ class SeatTest {
         }
 
         @Test
+        @DisplayName("[성공케이스] 판매 완료 좌석 환불 시 예약 가능 상태로 변경")
+        void refund_success() {
+            // given
+            Seat seat = createSeat(SeatStatus.SOLD);
+
+            // when
+            seat.refund();
+
+            // then
+            assertThat(seat.getStatus()).isEqualTo(SeatStatus.AVAILABLE);
+        }
+
+        @Test
         @DisplayName("[성공케이스] 열린 좌석 이용 불가 시 미판매 상태로 변경")
         void close_success() {
             // given
@@ -99,6 +112,7 @@ class SeatTest {
                 "CLOSED, hold, 미판매, 선점",
                 "SOLD, release, 판매 완료, 예약 가능",
                 "AVAILABLE, sell, 예약 가능, 판매 완료",
+                "OCCUPIED, refund, 선점, 예약 가능",
                 "SOLD, close, 판매 완료, 미판매"
         })
         @DisplayName("[실패케이스] 상태 전이 비즈니스 규칙 위반 시 올바른 예외 및 메시지 반환")
@@ -111,6 +125,7 @@ class SeatTest {
                 case "hold" -> seat::hold;
                 case "release" -> seat::release;
                 case "sell" -> seat::sell;
+                case "refund" -> seat::refund;
                 case "close" -> seat::close;
                 default -> throw new IllegalArgumentException("정의되지 않는 메서드: " + action);
             };

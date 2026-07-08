@@ -20,7 +20,11 @@ class SeatStatusTest {
 
             "OCCUPIED, SOLD, true",
             "OCCUPIED, AVAILABLE, true",
-            "OCCUPIED, CLOSED, false"
+            "OCCUPIED, CLOSED, false",
+
+            "SOLD, CLOSED, false",
+            "SOLD, AVAILABLE, true",
+            "SOLD, OCCUPIED, false"
     })
     @DisplayName("좌석 상태 간의 전이 가능 비즈니스 규칙 검증")
     void statusTransitionRules(SeatStatus current, SeatStatus next, boolean expected) {
@@ -29,20 +33,6 @@ class SeatStatusTest {
 
         // then
         assertThat(result).isEqualTo(expected);
-    }
-
-    @ParameterizedTest
-    @EnumSource(SeatStatus.class)
-    @DisplayName("판매 완료 상태에서는 어떤 상태로든 전이 불가")
-    void soldCannotChangeToAny(SeatStatus next) {
-        // given
-        SeatStatus current = SeatStatus.SOLD;
-
-        // when
-        boolean result = current.canChangeTo(next);
-
-        // then
-        assertThat(result).isFalse();
     }
 
     @ParameterizedTest
