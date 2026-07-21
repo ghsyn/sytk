@@ -136,6 +136,7 @@ class ReservationServiceTest {
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
         Reservation reservation = createReservation(reservationId, seat.getId());
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
+        given(seatRepository.findById(seat.getId())).willReturn(Optional.of(seat));
 
         // when
         reservationService.cancel(request);
@@ -206,6 +207,7 @@ class ReservationServiceTest {
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
         Reservation reservation = createReservation(reservationId, seat.getId());
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
+        given(seatRepository.findById(seat.getId())).willReturn(Optional.of(seat));
 
         // when
         reservationService.confirm(request);
@@ -276,6 +278,7 @@ class ReservationServiceTest {
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
         Reservation reservation = createReservation(reservationId, seat.getId());
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
+        given(seatRepository.findById(seat.getId())).willReturn(Optional.of(seat));
 
         // when
         reservationService.expire(request);
@@ -347,6 +350,7 @@ class ReservationServiceTest {
         Reservation reservation = createReservation(reservationId, seat.getId());
         ReflectionTestUtils.setField(reservation, "status", ReservationStatus.CONFIRMED);
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
+        given(seatRepository.findById(seat.getId())).willReturn(Optional.of(seat));
 
         // when
         reservationService.refund(request);
