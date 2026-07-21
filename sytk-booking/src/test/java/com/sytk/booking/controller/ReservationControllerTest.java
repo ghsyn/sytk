@@ -3,11 +3,7 @@ package com.sytk.booking.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sytk.booking.domain.ReservationStatus;
 import com.sytk.booking.exception.ReservationNotFoundException;
-import com.sytk.booking.request.ReservationCancelRequest;
-import com.sytk.booking.request.ReservationConfirmRequest;
 import com.sytk.booking.request.ReservationCreateRequest;
-import com.sytk.booking.request.ReservationExpireRequest;
-import com.sytk.booking.request.ReservationRefundRequest;
 import com.sytk.booking.response.ReservationCreateResponse;
 import com.sytk.booking.service.ReservationService;
 import org.junit.jupiter.api.DisplayName;
@@ -129,9 +125,8 @@ class ReservationControllerTest {
     void cancel_success() throws Exception {
         // given
         Long reservationId = 1L;
-        ReservationCancelRequest request = ReservationCancelRequest.builder().id(reservationId).build();
 
-        willDoNothing().given(reservationService).cancel(request);
+        willDoNothing().given(reservationService).cancel(reservationId);
 
         // when & then
         mockMvc.perform(patch("/api/v1/reservations/{id}/cancel", reservationId))
@@ -139,7 +134,7 @@ class ReservationControllerTest {
                 .andDo(print());
 
         // verify
-        then(reservationService).should(times(1)).cancel(eq(request));
+        then(reservationService).should(times(1)).cancel(eq(reservationId));
     }
 
     @Test
@@ -147,9 +142,8 @@ class ReservationControllerTest {
     void cancel_fail_notFound() throws Exception {
         // given
         Long reservationId = 1L;
-        ReservationCancelRequest request = ReservationCancelRequest.builder().id(reservationId).build();
 
-        willThrow(new ReservationNotFoundException()).given(reservationService).cancel(request);
+        willThrow(new ReservationNotFoundException()).given(reservationService).cancel(reservationId);
 
         // when & then
         mockMvc.perform(patch("/api/v1/reservations/{id}/cancel", reservationId))
@@ -159,7 +153,7 @@ class ReservationControllerTest {
                 .andDo(print());
 
         // verify
-        then(reservationService).should(times(1)).cancel(eq(request));
+        then(reservationService).should(times(1)).cancel(eq(reservationId));
     }
 
     @Test
@@ -187,9 +181,8 @@ class ReservationControllerTest {
     void confirm_success() throws Exception {
         // given
         Long reservationId = 1L;
-        ReservationConfirmRequest request = ReservationConfirmRequest.builder().id(reservationId).build();
 
-        willDoNothing().given(reservationService).confirm(request);
+        willDoNothing().given(reservationService).confirm(reservationId);
 
         // when & then
         mockMvc.perform(patch("/api/v1/reservations/{id}/confirm", reservationId))
@@ -197,7 +190,7 @@ class ReservationControllerTest {
                 .andDo(print());
 
         // verify
-        then(reservationService).should(times(1)).confirm(eq(request));
+        then(reservationService).should(times(1)).confirm(eq(reservationId));
     }
 
     @Test
@@ -205,9 +198,8 @@ class ReservationControllerTest {
     void confirm_fail_notFound() throws Exception {
         // given
         Long reservationId = 1L;
-        ReservationConfirmRequest request = ReservationConfirmRequest.builder().id(reservationId).build();
 
-        willThrow(new ReservationNotFoundException()).given(reservationService).confirm(request);
+        willThrow(new ReservationNotFoundException()).given(reservationService).confirm(reservationId);
 
         // when & then
         mockMvc.perform(patch("/api/v1/reservations/{id}/confirm", reservationId))
@@ -217,7 +209,7 @@ class ReservationControllerTest {
                 .andDo(print());
 
         // verify
-        then(reservationService).should(times(1)).confirm(eq(request));
+        then(reservationService).should(times(1)).confirm(eq(reservationId));
     }
 
     /**
@@ -228,9 +220,8 @@ class ReservationControllerTest {
     void expire_success() throws Exception {
         // given
         Long reservationId = 1L;
-        ReservationExpireRequest request = ReservationExpireRequest.builder().id(reservationId).build();
 
-        willDoNothing().given(reservationService).expire(request);
+        willDoNothing().given(reservationService).expire(reservationId);
 
         // when & then
         mockMvc.perform(patch("/api/v1/reservations/{id}/expire", reservationId))
@@ -238,7 +229,7 @@ class ReservationControllerTest {
                 .andDo(print());
 
         // verify
-        then(reservationService).should(times(1)).expire(eq(request));
+        then(reservationService).should(times(1)).expire(eq(reservationId));
     }
 
     @Test
@@ -246,9 +237,8 @@ class ReservationControllerTest {
     void expire_fail_notFound() throws Exception {
         // given
         Long reservationId = 1L;
-        ReservationExpireRequest request = ReservationExpireRequest.builder().id(reservationId).build();
 
-        willThrow(new ReservationNotFoundException()).given(reservationService).expire(request);
+        willThrow(new ReservationNotFoundException()).given(reservationService).expire(reservationId);
 
         // when & then
         mockMvc.perform(patch("/api/v1/reservations/{id}/expire", reservationId))
@@ -258,7 +248,7 @@ class ReservationControllerTest {
                 .andDo(print());
 
         // verify
-        then(reservationService).should(times(1)).expire(eq(request));
+        then(reservationService).should(times(1)).expire(eq(reservationId));
     }
 
     /**
@@ -269,9 +259,8 @@ class ReservationControllerTest {
     void refund_success() throws Exception {
         // given
         Long reservationId = 1L;
-        ReservationRefundRequest request = ReservationRefundRequest.builder().id(reservationId).build();
 
-        willDoNothing().given(reservationService).refund(request);
+        willDoNothing().given(reservationService).refund(reservationId);
 
         // when & then
         mockMvc.perform(patch("/api/v1/reservations/{id}/refund", reservationId))
@@ -279,7 +268,7 @@ class ReservationControllerTest {
                 .andDo(print());
 
         // verify
-        then(reservationService).should(times(1)).refund(eq(request));
+        then(reservationService).should(times(1)).refund(eq(reservationId));
     }
 
     @Test
@@ -287,9 +276,8 @@ class ReservationControllerTest {
     void refund_fail_notFound() throws Exception {
         // given
         Long reservationId = 1L;
-        ReservationRefundRequest request = ReservationRefundRequest.builder().id(reservationId).build();
 
-        willThrow(new ReservationNotFoundException()).given(reservationService).refund(request);
+        willThrow(new ReservationNotFoundException()).given(reservationService).refund(reservationId);
 
         // when & then
         mockMvc.perform(patch("/api/v1/reservations/{id}/refund", reservationId))
@@ -299,6 +287,6 @@ class ReservationControllerTest {
                 .andDo(print());
 
         // verify
-        then(reservationService).should(times(1)).refund(eq(request));
+        then(reservationService).should(times(1)).refund(eq(reservationId));
     }
 }

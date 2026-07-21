@@ -37,8 +37,8 @@ public class ReservationService {
      * 예매 취소
      */
     @Transactional
-    public void cancel(ReservationCancelRequest request) {
-        Reservation reservation = getReservation(request.id());
+    public void cancel(Long id) {
+        Reservation reservation = getReservation(id);
         reservation.cancel();
 
         getSeat(reservation.getSeatId()).release();
@@ -48,8 +48,8 @@ public class ReservationService {
      * 예매 확정
      */
     @Transactional
-    public void confirm(ReservationConfirmRequest request) {
-        Reservation reservation = getReservation(request.id());
+    public void confirm(Long id) {
+        Reservation reservation = getReservation(id);
         reservation.confirm();
 
         getSeat(reservation.getSeatId()).sell();
@@ -59,8 +59,8 @@ public class ReservationService {
      * 예매 만료(타임아웃)
      */
     @Transactional
-    public void expire(ReservationExpireRequest request) {
-        Reservation reservation = getReservation(request.id());
+    public void expire(Long id) {
+        Reservation reservation = getReservation(id);
         reservation.expire();
 
         getSeat(reservation.getSeatId()).release();
@@ -70,8 +70,8 @@ public class ReservationService {
      * 예매 환불
      */
     @Transactional
-    public void refund(ReservationRefundRequest request) {
-        Reservation reservation = getReservation(request.id());
+    public void refund(Long id) {
+        Reservation reservation = getReservation(id);
         reservation.refund();
 
         getSeat(reservation.getSeatId()).refund();

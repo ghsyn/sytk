@@ -4,11 +4,7 @@ import com.sytk.booking.domain.*;
 import com.sytk.booking.exception.*;
 import com.sytk.booking.repository.ReservationRepository;
 import com.sytk.booking.repository.SeatRepository;
-import com.sytk.booking.request.ReservationCancelRequest;
-import com.sytk.booking.request.ReservationConfirmRequest;
 import com.sytk.booking.request.ReservationCreateRequest;
-import com.sytk.booking.request.ReservationExpireRequest;
-import com.sytk.booking.request.ReservationRefundRequest;
 import com.sytk.booking.response.ReservationCreateResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -129,9 +125,6 @@ class ReservationServiceTest {
     void cancel_success() {
         // given
         Long reservationId = 1L;
-        ReservationCancelRequest request = ReservationCancelRequest.builder()
-                .id(reservationId)
-                .build();
 
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
         Reservation reservation = createReservation(reservationId, seat.getId());
@@ -139,7 +132,7 @@ class ReservationServiceTest {
         given(seatRepository.findById(seat.getId())).willReturn(Optional.of(seat));
 
         // when
-        reservationService.cancel(request);
+        reservationService.cancel(reservationId);
 
         // then
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
@@ -154,14 +147,11 @@ class ReservationServiceTest {
     void cancel_fail_notFound() {
         // given
         Long notExistReservationId = 999L;
-        ReservationCancelRequest request = ReservationCancelRequest.builder()
-                .id(notExistReservationId)
-                .build();
 
         given(reservationRepository.findById(notExistReservationId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancel(request))
+        assertThatThrownBy(() -> reservationService.cancel(notExistReservationId))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESERVATION_NOT_FOUND);
 
@@ -174,9 +164,6 @@ class ReservationServiceTest {
     void cancel_fail_alreadyCanceled() {
         // given
         Long reservationId = 1L;
-        ReservationCancelRequest request = ReservationCancelRequest.builder()
-                .id(reservationId)
-                .build();
 
         Seat seat = createSeat(1L, SeatStatus.AVAILABLE);
         Reservation reservation = createReservation(reservationId, seat.getId());
@@ -184,7 +171,7 @@ class ReservationServiceTest {
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancel(request))
+        assertThatThrownBy(() -> reservationService.cancel(reservationId))
                 .isInstanceOf(InvalidReservationStatusTransitionException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_RESERVATION_STATUS_TRANSITION);
 
@@ -200,9 +187,6 @@ class ReservationServiceTest {
     void confirm_success() {
         // given
         Long reservationId = 1L;
-        ReservationConfirmRequest request = ReservationConfirmRequest.builder()
-                .id(reservationId)
-                .build();
 
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
         Reservation reservation = createReservation(reservationId, seat.getId());
@@ -210,7 +194,7 @@ class ReservationServiceTest {
         given(seatRepository.findById(seat.getId())).willReturn(Optional.of(seat));
 
         // when
-        reservationService.confirm(request);
+        reservationService.confirm(reservationId);
 
         // then
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
@@ -225,14 +209,11 @@ class ReservationServiceTest {
     void confirm_fail_notFound() {
         // given
         Long notExistReservationId = 999L;
-        ReservationConfirmRequest request = ReservationConfirmRequest.builder()
-                .id(notExistReservationId)
-                .build();
 
         given(reservationRepository.findById(notExistReservationId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.confirm(request))
+        assertThatThrownBy(() -> reservationService.confirm(notExistReservationId))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESERVATION_NOT_FOUND);
 
@@ -245,9 +226,6 @@ class ReservationServiceTest {
     void confirm_fail_alreadyCanceled() {
         // given
         Long reservationId = 1L;
-        ReservationConfirmRequest request = ReservationConfirmRequest.builder()
-                .id(reservationId)
-                .build();
 
         Seat seat = createSeat(1L, SeatStatus.AVAILABLE);
         Reservation reservation = createReservation(reservationId, seat.getId());
@@ -255,7 +233,7 @@ class ReservationServiceTest {
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.confirm(request))
+        assertThatThrownBy(() -> reservationService.confirm(reservationId))
                 .isInstanceOf(InvalidReservationStatusTransitionException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_RESERVATION_STATUS_TRANSITION);
 
@@ -271,9 +249,6 @@ class ReservationServiceTest {
     void expire_success() {
         // given
         Long reservationId = 1L;
-        ReservationExpireRequest request = ReservationExpireRequest.builder()
-                .id(reservationId)
-                .build();
 
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
         Reservation reservation = createReservation(reservationId, seat.getId());
@@ -281,7 +256,7 @@ class ReservationServiceTest {
         given(seatRepository.findById(seat.getId())).willReturn(Optional.of(seat));
 
         // when
-        reservationService.expire(request);
+        reservationService.expire(reservationId);
 
         // then
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.EXPIRED);
@@ -296,14 +271,11 @@ class ReservationServiceTest {
     void expire_fail_notFound() {
         // given
         Long notExistId = 999L;
-        ReservationExpireRequest request = ReservationExpireRequest.builder()
-                .id(notExistId)
-                .build();
 
         given(reservationRepository.findById(notExistId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.expire(request))
+        assertThatThrownBy(() -> reservationService.expire(notExistId))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESERVATION_NOT_FOUND);
 
@@ -316,9 +288,6 @@ class ReservationServiceTest {
     void expire_fail_alreadyConfirmed() {
         // given
         Long reservationId = 1L;
-        ReservationExpireRequest request = ReservationExpireRequest.builder()
-                .id(reservationId)
-                .build();
 
         Seat seat = createSeat(1L, SeatStatus.SOLD);
         Reservation reservation = createReservation(reservationId, seat.getId());
@@ -326,7 +295,7 @@ class ReservationServiceTest {
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.expire(request))
+        assertThatThrownBy(() -> reservationService.expire(reservationId))
                 .isInstanceOf(InvalidReservationStatusTransitionException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_RESERVATION_STATUS_TRANSITION);
 
@@ -342,9 +311,6 @@ class ReservationServiceTest {
     void refund_success() {
         // given
         Long reservationId = 1L;
-        ReservationRefundRequest request = ReservationRefundRequest.builder()
-                .id(reservationId)
-                .build();
 
         Seat seat = createSeat(1L, SeatStatus.SOLD);
         Reservation reservation = createReservation(reservationId, seat.getId());
@@ -353,7 +319,7 @@ class ReservationServiceTest {
         given(seatRepository.findById(seat.getId())).willReturn(Optional.of(seat));
 
         // when
-        reservationService.refund(request);
+        reservationService.refund(reservationId);
 
         // then
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.REFUNDED);
@@ -368,14 +334,11 @@ class ReservationServiceTest {
     void refund_fail_notFound() {
         // given
         Long notExistId = 999L;
-        ReservationRefundRequest request = ReservationRefundRequest.builder()
-                .id(notExistId)
-                .build();
 
         given(reservationRepository.findById(notExistId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.refund(request))
+        assertThatThrownBy(() -> reservationService.refund(notExistId))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESERVATION_NOT_FOUND);
 
@@ -391,14 +354,10 @@ class ReservationServiceTest {
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
         Reservation reservation = createReservation(reservationId, seat.getId());
 
-        ReservationRefundRequest request = ReservationRefundRequest.builder()
-                .id(reservationId)
-                .build();
-
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.refund(request))
+        assertThatThrownBy(() -> reservationService.refund(reservationId))
                 .isInstanceOf(InvalidReservationStatusTransitionException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_RESERVATION_STATUS_TRANSITION);
 
