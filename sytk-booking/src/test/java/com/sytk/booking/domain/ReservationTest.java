@@ -45,11 +45,13 @@ class ReservationTest {
         @Test
         @DisplayName("[실패케이스] userId가 null이면 IllegalArgumentException 예외 발생")
         void create_fail_nullUserId() {
-            // when & then
-            assertThatThrownBy(() -> Reservation.builder()
+            // given
+            Reservation.ReservationBuilder builder = Reservation.builder()
                     .userId(null)
-                    .seatId(seat.getId())
-                    .build())
+                    .seatId(seat.getId());
+
+            // when & then
+            assertThatThrownBy(builder::build)
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("유저 ID는 필수입니다.");
         }
@@ -57,11 +59,13 @@ class ReservationTest {
         @Test
         @DisplayName("[실패케이스] seat이 null이면 IllegalArgumentException 예외 발생")
         void create_fail_nullSeat() {
-            // when & then
-            assertThatThrownBy(() -> Reservation.builder()
+            // given
+            Reservation.ReservationBuilder builder = Reservation.builder()
                     .userId(1L)
-                    .seatId(null)
-                    .build())
+                    .seatId(null);
+
+            // when & then
+            assertThatThrownBy(builder::build)
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("좌석은 필수입니다.");
         }
