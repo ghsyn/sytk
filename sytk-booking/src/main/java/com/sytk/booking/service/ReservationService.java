@@ -8,7 +8,7 @@ import com.sytk.booking.repository.ReservationRepository;
 import com.sytk.booking.repository.SeatRepository;
 import com.sytk.booking.request.*;
 import com.sytk.booking.response.ReservationCreateResponse;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
