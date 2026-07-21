@@ -39,7 +39,7 @@ class ReservationTest {
             // when & then
             assertThatThrownBy(() -> Reservation.builder()
                     .userId(null)
-                    .seat(seat)
+                    .seatId(seat.getId())
                     .build())
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("유저 ID는 필수입니다.");
@@ -51,7 +51,7 @@ class ReservationTest {
             // when & then
             assertThatThrownBy(() -> Reservation.builder()
                     .userId(1L)
-                    .seat(null)
+                    .seatId(null)
                     .build())
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("좌석은 필수입니다.");
@@ -199,7 +199,7 @@ class ReservationTest {
     private Reservation createReservation() {
         return Reservation.builder()
                 .userId(1L)
-                .seat(seat)
+                .seatId(seat.getId())
                 .build();
     }
 }

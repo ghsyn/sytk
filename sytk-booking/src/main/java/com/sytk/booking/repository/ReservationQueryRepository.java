@@ -18,7 +18,7 @@ public class ReservationQueryRepository {
         Integer fetchOne = queryFactory
                 .selectOne()
                 .from(reservation)
-                .join(reservation.seat, seat)
+                .join(seat).on(reservation.seatId.eq(seat.id))
                 .join(seat.seatGrade, seatGrade)
                 .where(seatGrade.concert.id.eq(concertId))
                 .fetchFirst();

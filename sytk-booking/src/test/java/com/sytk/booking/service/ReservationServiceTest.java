@@ -31,7 +31,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
-public class ReservationServiceTest {
+class ReservationServiceTest {
 
     @InjectMocks
     private ReservationService reservationService;
@@ -59,7 +59,7 @@ public class ReservationServiceTest {
         Seat seat = createSeat(seatId, SeatStatus.AVAILABLE);
         given(seatRepository.findById(seatId)).willReturn(Optional.of(seat));
 
-        Reservation reservation = createReservation(1L, seat);
+        Reservation reservation = createReservation(1L, seatId);
         given(reservationRepository.save(any(Reservation.class))).willReturn(reservation);
 
         // when
@@ -130,11 +130,11 @@ public class ReservationServiceTest {
         // given
         Long reservationId = 1L;
         ReservationCancelRequest request = ReservationCancelRequest.builder()
-                .reservationId(reservationId)
+                .id(reservationId)
                 .build();
 
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
-        Reservation reservation = createReservation(reservationId, seat);
+        Reservation reservation = createReservation(reservationId, seat.getId());
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
         // when
@@ -152,12 +152,12 @@ public class ReservationServiceTest {
     @DisplayName("[실패케이스 - 접근 검증] 존재하지 않는 예매 취소 시 ReservationNotFoundException 발생")
     void cancel_fail_notFound() {
         // given
-        Long notExistId = 999L;
+        Long notExistReservationId = 999L;
         ReservationCancelRequest request = ReservationCancelRequest.builder()
-                .reservationId(notExistId)
+                .id(notExistReservationId)
                 .build();
 
-        given(reservationRepository.findById(notExistId)).willReturn(Optional.empty());
+        given(reservationRepository.findById(notExistReservationId)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> reservationService.cancel(request))
@@ -165,7 +165,7 @@ public class ReservationServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESERVATION_NOT_FOUND);
 
         // verify
-        then(reservationRepository).should(times(1)).findById(notExistId);
+        then(reservationRepository).should(times(1)).findById(notExistReservationId);
     }
 
     @Test
@@ -174,11 +174,11 @@ public class ReservationServiceTest {
         // given
         Long reservationId = 1L;
         ReservationCancelRequest request = ReservationCancelRequest.builder()
-                .reservationId(reservationId)
+                .id(reservationId)
                 .build();
 
         Seat seat = createSeat(1L, SeatStatus.AVAILABLE);
-        Reservation reservation = createReservation(reservationId, seat);
+        Reservation reservation = createReservation(reservationId, seat.getId());
         ReflectionTestUtils.setField(reservation, "status", ReservationStatus.CANCELED);
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
@@ -200,11 +200,11 @@ public class ReservationServiceTest {
         // given
         Long reservationId = 1L;
         ReservationConfirmRequest request = ReservationConfirmRequest.builder()
-                .reservationId(reservationId)
+                .id(reservationId)
                 .build();
 
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
-        Reservation reservation = createReservation(reservationId, seat);
+        Reservation reservation = createReservation(reservationId, seat.getId());
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
         // when
@@ -222,12 +222,12 @@ public class ReservationServiceTest {
     @DisplayName("[실패케이스 - 접근 검증] 존재하지 않는 예매 확정 시 ReservationNotFoundException 발생")
     void confirm_fail_notFound() {
         // given
-        Long notExistId = 999L;
+        Long notExistReservationId = 999L;
         ReservationConfirmRequest request = ReservationConfirmRequest.builder()
-                .reservationId(notExistId)
+                .id(notExistReservationId)
                 .build();
 
-        given(reservationRepository.findById(notExistId)).willReturn(Optional.empty());
+        given(reservationRepository.findById(notExistReservationId)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> reservationService.confirm(request))
@@ -235,7 +235,7 @@ public class ReservationServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESERVATION_NOT_FOUND);
 
         // verify
-        then(reservationRepository).should(times(1)).findById(notExistId);
+        then(reservationRepository).should(times(1)).findById(notExistReservationId);
     }
 
     @Test
@@ -244,11 +244,11 @@ public class ReservationServiceTest {
         // given
         Long reservationId = 1L;
         ReservationConfirmRequest request = ReservationConfirmRequest.builder()
-                .reservationId(reservationId)
+                .id(reservationId)
                 .build();
 
         Seat seat = createSeat(1L, SeatStatus.AVAILABLE);
-        Reservation reservation = createReservation(reservationId, seat);
+        Reservation reservation = createReservation(reservationId, seat.getId());
         ReflectionTestUtils.setField(reservation, "status", ReservationStatus.CANCELED);
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
@@ -270,11 +270,11 @@ public class ReservationServiceTest {
         // given
         Long reservationId = 1L;
         ReservationExpireRequest request = ReservationExpireRequest.builder()
-                .reservationId(reservationId)
+                .id(reservationId)
                 .build();
 
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
-        Reservation reservation = createReservation(reservationId, seat);
+        Reservation reservation = createReservation(reservationId, seat.getId());
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
         // when
@@ -294,7 +294,7 @@ public class ReservationServiceTest {
         // given
         Long notExistId = 999L;
         ReservationExpireRequest request = ReservationExpireRequest.builder()
-                .reservationId(notExistId)
+                .id(notExistId)
                 .build();
 
         given(reservationRepository.findById(notExistId)).willReturn(Optional.empty());
@@ -314,11 +314,11 @@ public class ReservationServiceTest {
         // given
         Long reservationId = 1L;
         ReservationExpireRequest request = ReservationExpireRequest.builder()
-                .reservationId(reservationId)
+                .id(reservationId)
                 .build();
 
         Seat seat = createSeat(1L, SeatStatus.SOLD);
-        Reservation reservation = createReservation(reservationId, seat);
+        Reservation reservation = createReservation(reservationId, seat.getId());
         ReflectionTestUtils.setField(reservation, "status", ReservationStatus.CONFIRMED);
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
@@ -340,11 +340,11 @@ public class ReservationServiceTest {
         // given
         Long reservationId = 1L;
         ReservationRefundRequest request = ReservationRefundRequest.builder()
-                .reservationId(reservationId)
+                .id(reservationId)
                 .build();
 
         Seat seat = createSeat(1L, SeatStatus.SOLD);
-        Reservation reservation = createReservation(reservationId, seat);
+        Reservation reservation = createReservation(reservationId, seat.getId());
         ReflectionTestUtils.setField(reservation, "status", ReservationStatus.CONFIRMED);
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
 
@@ -365,7 +365,7 @@ public class ReservationServiceTest {
         // given
         Long notExistId = 999L;
         ReservationRefundRequest request = ReservationRefundRequest.builder()
-                .reservationId(notExistId)
+                .id(notExistId)
                 .build();
 
         given(reservationRepository.findById(notExistId)).willReturn(Optional.empty());
@@ -385,10 +385,10 @@ public class ReservationServiceTest {
         // given
         Long reservationId = 1L;
         Seat seat = createSeat(1L, SeatStatus.OCCUPIED);
-        Reservation reservation = createReservation(reservationId, seat);
+        Reservation reservation = createReservation(reservationId, seat.getId());
 
         ReservationRefundRequest request = ReservationRefundRequest.builder()
-                .reservationId(reservationId)
+                .id(reservationId)
                 .build();
 
         given(reservationRepository.findById(reservationId)).willReturn(Optional.of(reservation));
@@ -431,10 +431,10 @@ public class ReservationServiceTest {
         return seat;
     }
 
-    private Reservation createReservation(Long id, Seat seat) {
+    private Reservation createReservation(Long id, Long seatId) {
         Reservation reservation = Reservation.builder()
                 .userId(1L)
-                .seat(seat)
+                .seatId(seatId)
                 .build();
 
         if (id != null) {

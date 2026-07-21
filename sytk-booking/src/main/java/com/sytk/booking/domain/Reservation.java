@@ -32,27 +32,26 @@ public class Reservation {
     @Column(nullable = false)
     private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_id", nullable = false)
-    private Seat seat;
+    private Long seatId;
 
     @Version
     private Long version;
 
     @Builder
-    public Reservation(Long userId, Seat seat) {
+    public Reservation(Long userId, Long seatId) {
 
         if (userId == null) {
             throw new IllegalArgumentException("유저 ID는 필수입니다.");
         }
-        if (seat == null) {
+        if (seatId == null) {
             throw new IllegalArgumentException("좌석은 필수입니다.");
         }
 
         this.status = ReservationStatus.RESERVING;
-        this.expiredAt = now();
+        this.expiredAt = now().plusMinutes(60);
         this.userId = userId;
-        this.seat = seat;
+        this.seatId = seatId;
     }
 
     public boolean isExpired(OffsetDateTime currentTime) {
