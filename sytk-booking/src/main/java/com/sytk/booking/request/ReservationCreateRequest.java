@@ -1,6 +1,7 @@
 package com.sytk.booking.request;
 
 import com.sytk.booking.domain.Reservation;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 /**
@@ -8,7 +9,10 @@ import lombok.Builder;
  */
 @Builder
 public record ReservationCreateRequest(
+        @NotNull(message = "유저 ID를 입력하세요.")
         Long userId,
+
+        @NotNull(message = "좌석 ID를 입력하세요.")
         Long seatId
 ) {
     public Reservation toEntity() {
