@@ -8,12 +8,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
+import static java.time.Clock.fixed;
 import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTest {
+
+    private static final Clock FIXED_CLOCK = fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
+    private static final OffsetDateTime FIXED_NOW = now(FIXED_CLOCK);
 
     @Mock
     private Seat seat;
@@ -30,7 +39,7 @@ class ReservationTest {
 
             // then
             assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVING);
-            assertThat(reservation.getExpiredAt()).isBefore(now());
+            assertThat(reservation.getExpiredAt()).isEqualTo(FIXED_NOW.plusMinutes(60));
         }
 
         @Test
@@ -179,7 +188,7 @@ class ReservationTest {
             Reservation reservation = createReservation();
 
             // when & then
-            assertThat(reservation.isExpired(now())).isTrue();
+            assertThat(reservation.isExpired(FIXED_NOW.plusMinutes(60))).isTrue();
         }
 
         @Test
@@ -189,7 +198,7 @@ class ReservationTest {
             Reservation reservation = createReservation();
 
             // when & then
-            assertThat(reservation.isExpired(now().minusMinutes(10))).isFalse();
+            assertThat(reservation.isExpired(FIXED_NOW.plusMinutes(10))).isFalse();
         }
     }
 
@@ -200,6 +209,7 @@ class ReservationTest {
         return Reservation.builder()
                 .userId(1L)
                 .seatId(seat.getId())
+                .clock(FIXED_CLOCK)
                 .build();
     }
 }

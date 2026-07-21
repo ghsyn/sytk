@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
 
 import static java.time.OffsetDateTime.now;
@@ -39,7 +40,7 @@ public class Reservation {
     private Long version;
 
     @Builder
-    public Reservation(Long userId, Long seatId) {
+    public Reservation(Long userId, Long seatId, Clock clock) {
 
         if (userId == null) {
             throw new IllegalArgumentException("유저 ID는 필수입니다.");
@@ -49,7 +50,7 @@ public class Reservation {
         }
 
         this.status = ReservationStatus.RESERVING;
-        this.expiredAt = now().plusMinutes(60);
+        this.expiredAt = now((clock != null) ? clock : Clock.systemDefaultZone()).plusMinutes(60);
         this.userId = userId;
         this.seatId = seatId;
     }
