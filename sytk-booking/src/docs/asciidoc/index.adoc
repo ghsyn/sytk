@@ -52,3 +52,75 @@ include::{snippets}/concert-delete/path-parameters.adoc[]
 include::{snippets}/concert-delete/http-request.adoc[]
 ==== Response HTTP
 include::{snippets}/concert-delete/http-response.adoc[]
+
+== Reservation API
+
+좌석 예매의 생성 및 상태 변경(취소/확정/만료/환불)을 담당하는 Command API입니다.
+
+=== 1. 예매 생성
+`POST /api/v1/reservations`
+
+==== Request HTTP
+include::{snippets}/reservation-create/http-request.adoc[]
+==== Request Fields
+include::{snippets}/reservation-create/request-fields.adoc[]
+==== Response HTTP
+include::{snippets}/reservation-create/http-response.adoc[]
+==== Response Fields
+include::{snippets}/reservation-create/response-fields.adoc[]
+
+---
+
+=== 2. 예매 취소
+`PATCH /api/v1/reservations/{id}/cancel`
+
+- 결제 전(RESERVING) 상태의 예매를 사용자가 직접 취소합니다.
+
+==== Path Parameters
+include::{snippets}/reservation-cancel/path-parameters.adoc[]
+==== Request HTTP
+include::{snippets}/reservation-cancel/http-request.adoc[]
+==== Response HTTP
+include::{snippets}/reservation-cancel/http-response.adoc[]
+
+---
+
+=== 3. 예매 확정
+`PATCH /api/v1/reservations/{id}/confirm`
+
+- 결제 완료 시 예매를 확정 상태로 전환합니다.
+
+==== Path Parameters
+include::{snippets}/reservation-confirm/path-parameters.adoc[]
+==== Request HTTP
+include::{snippets}/reservation-confirm/http-request.adoc[]
+==== Response HTTP
+include::{snippets}/reservation-confirm/http-response.adoc[]
+
+---
+
+=== 4. 예매 만료
+`PATCH /api/v1/reservations/{id}/expire`
+
+- 좌석 선점 시간 내 결제가 이루어지지 않아 타임아웃된 예매를 만료 처리합니다.
+
+==== Path Parameters
+include::{snippets}/reservation-expire/path-parameters.adoc[]
+==== Request HTTP
+include::{snippets}/reservation-expire/http-request.adoc[]
+==== Response HTTP
+include::{snippets}/reservation-expire/http-response.adoc[]
+
+---
+
+=== 5. 예매 환불
+`PATCH /api/v1/reservations/{id}/refund`
+
+- 결제 완료(CONFIRMED) 상태의 예매를 환불 처리합니다.
+
+==== Path Parameters
+include::{snippets}/reservation-refund/path-parameters.adoc[]
+==== Request HTTP
+include::{snippets}/reservation-refund/http-request.adoc[]
+==== Response HTTP
+include::{snippets}/reservation-refund/http-response.adoc[]
