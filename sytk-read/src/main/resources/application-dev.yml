@@ -1,9 +1,9 @@
 spring:
   datasource:
     # dev는 replica 없으니 main 그대로 사용(local에서 replica 따로 띄우는 건 오버엔지니어링, docker-compose에서 replica 흉내내기)
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/sytk_dev}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    url: ${DEV_DB_URL:jdbc:postgresql://localhost:5432/sytk_dev}
+    username: ${DEV_DB_USERNAME:postgres}
+    password: ${DEV_DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   jpa:

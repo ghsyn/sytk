@@ -83,9 +83,9 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://sytk-db:5432/sytk_dev
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      DEV_DB_URL: jdbc:postgresql://sytk-db:5432/sytk_dev
+      DEV_DB_USERNAME: postgres
+      DEV_DB_PASSWORD: postgres
       SPRING_DATA_REDIS_HOST: sytk-redis
 
   payment-service:
@@ -103,9 +103,9 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://sytk-db:5432/sytk_dev
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      DEV_DB_URL: jdbc:postgresql://sytk-db:5432/sytk_dev
+      DEV_DB_USERNAME: postgres
+      DEV_DB_PASSWORD: postgres
       SPRING_KAFKA_BOOTSTRAP_SERVERS: sytk-kafka:29092
 
   read-service:
@@ -125,9 +125,9 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://sytk-db:5432/sytk_dev
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      DEV_DB_URL: jdbc:postgresql://sytk-db:5432/sytk_dev
+      DEV_DB_USERNAME: postgres
+      DEV_DB_PASSWORD: postgres
       SPRING_DATA_REDIS_HOST: sytk-redis
       SPRING_KAFKA_BOOTSTRAP_SERVERS: sytk-kafka:29092
 
