@@ -26,6 +26,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
+
+    // Apache 엔진은 TestRestTemplate PATCH 지원 (JDK 기본 HttpURLConnection은 PATCH 미지원)
+    testImplementation 'org.apache.httpcomponents.client5:httpclient5'
 }
 
 bootJar {
