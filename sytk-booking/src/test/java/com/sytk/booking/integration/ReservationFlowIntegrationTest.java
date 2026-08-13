@@ -1,6 +1,7 @@
 package com.sytk.booking.integration;
 
 import com.sytk.booking.domain.*;
+import com.sytk.booking.exception.ErrorResponse;
 import com.sytk.booking.repository.ConcertRepository;
 import com.sytk.booking.repository.ReservationRepository;
 import com.sytk.booking.repository.SeatGradeRepository;
@@ -52,19 +53,17 @@ class ReservationFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Nested
     class 정상_예매 {
-        /* 예매 가능한 좌석 → 예매 생성 → 201 + 좌석 선점(OCCUPIED) + 예매 RESERVING 검증 */
-
         @Test
         @DisplayName("예매 가능한 좌석에 예매를 요청하면 201과 함께 예매가 생성되고 좌석이 선점된다.")
         void createReservationOnAvailableSeat() {
-            // given : 실제 DB에 예매 가능한(AVAILABLE) 좌석 저장
+            // given
             Seat seat = persistAvailableSeat();
             ReservationCreateRequest request = ReservationCreateRequest.builder()
                     .userId(1L)
                     .seatId(seat.getId())
                     .build();
 
-            // when : 실제 HTTP 예매 요청
+            // when
             ResponseEntity<ReservationCreateResponse> response = testRestTemplate.postForEntity(
                     "/api/v1/reservations", request, ReservationCreateResponse.class);
 
@@ -89,7 +88,48 @@ class ReservationFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Nested
     class 중복_예매 {
-        /* 같은 좌석 재요청 → 409, 재고 불변 */
+        @Test
+        @DisplayName("같은 좌석에 순차적으로 2회 예매 시 첫 번째 요청이 정상적으로 이루어진다면 두 번째 요청은 409를 반환하고 좌석 상태는 변하지 않는다.")
+        void createReservationOnOccupiedSeat() {
+            // given
+            Seat seat = persistAvailableSeat();
+            ReservationCreateRequest firstRequest = ReservationCreateRequest.builder()
+                    .userId(1L)
+                    .seatId(seat.getId())
+                    .build();
+
+            ResponseEntity<ReservationCreateResponse> firstResponse = testRestTemplate.postForEntity(
+                    "/api/v1/reservations", firstRequest, ReservationCreateResponse.class);
+
+            assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+            assertThat(firstResponse.getBody().status()).isNotNull();
+            assertThat(firstResponse.getBody().status()).isEqualTo(ReservationStatus.RESERVING);
+
+            ReservationCreateRequest secondRequest = ReservationCreateRequest.builder()
+                    .userId(2L)
+                    .seatId(seat.getId())
+                    .build();
+
+            // when
+            ResponseEntity<ErrorResponse> secondResponse = testRestTemplate.postForEntity(
+                    "/api/v1/reservations", secondRequest, ErrorResponse.class);
+
+            // then : 응답 상태·바디 검증 (409 Conflict + null)
+            assertThat(secondResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+            assertThat(secondResponse.getBody()).isNotNull();
+            assertThat(secondResponse.getBody().message()).isEqualTo("이미 예매된 좌석입니다.");
+
+            // then : DB 좌석 상태 검증 (OCCUPIED 유지)
+            assertThat(seatRepository.findById(seat.getId()).orElseThrow().getStatus()).isEqualTo(SeatStatus.OCCUPIED);
+
+            // then : DB 예매 상태 검증 (첫 번째 요청만 존재, 첫 번째 요청 예매 상태 RESERVING 유지)
+            assertThat(reservationRepository.findBySeatId(seat.getId()))
+                    .singleElement()
+                    .satisfies(r -> {
+                        assertThat(r.getId()).isEqualTo(firstResponse.getBody().id());
+                        assertThat(r.getStatus()).isEqualTo(ReservationStatus.RESERVING);
+                    });
+        }
     }
 
     @Nested
