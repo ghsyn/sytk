@@ -1,6 +1,7 @@
 package com.sytk.booking.domain;
 
 import com.sytk.booking.exception.InvalidSeatStatusTransitionException;
+import com.sytk.booking.exception.SeatAlreadyOccupiedException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -57,6 +58,9 @@ public class Seat {
 
     // 선점(AVAILABLE -> OCCUPIED)
     public void hold() {
+        if (this.status == SeatStatus.OCCUPIED || this.status == SeatStatus.SOLD) {
+            throw new SeatAlreadyOccupiedException();
+        }
         changeStatus(SeatStatus.AVAILABLE, SeatStatus.OCCUPIED);
     }
 

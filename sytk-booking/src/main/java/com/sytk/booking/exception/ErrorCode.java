@@ -26,7 +26,8 @@ public enum ErrorCode {
 
     // Reservation
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예매 내역을 찾을 수 없습니다."),
-    INVALID_RESERVATION_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "변경할 수 없는 예매 상태입니다.");
+    INVALID_RESERVATION_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "변경할 수 없는 예매 상태입니다."),
+    SEAT_ALREADY_OCCUPIED(HttpStatus.CONFLICT, "이미 예매된 좌석입니다.");
 
     private final HttpStatus status;
     private final String message;
