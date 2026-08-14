@@ -159,7 +159,51 @@ class ReservationFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Nested
     class 재고_소진 {
-        /* 매진 후 요청 → 예매 거부 */
+        @Test
+        @DisplayName("판매 확정된 좌석(SOLD) 예매 요청 시 판매 완료 상태(CONFIRMED/SOLD) 유지 후 409 및 SEAT_ALREADY_OCCUPIED 예외 반환")
+        void createReservationOnSoldSeat() {
+            // given
+            Seat seat = persistAvailableSeat();
+            ReservationCreateRequest request = ReservationCreateRequest.builder()
+                    .userId(1L)
+                    .seatId(seat.getId())
+                    .build();
+
+            Long reservationId = Objects.requireNonNull(testRestTemplate.postForEntity(
+                    "/api/v1/reservations", request, ReservationCreateResponse.class).getBody()).id();
+
+            ResponseEntity<Void> confirmResponse = testRestTemplate.exchange(
+                    "/api/v1/reservations/{id}/confirm", HttpMethod.PATCH, null, Void.class, reservationId);
+
+            assertThat(confirmResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+            assertThat(seatRepository.findById(seat.getId()).orElseThrow().getStatus()).isEqualTo(SeatStatus.SOLD);
+
+            ReservationCreateRequest lateRequest = ReservationCreateRequest.builder()
+                    .userId(2L)
+                    .seatId(seat.getId())
+                    .build();
+
+            // when
+            ResponseEntity<ErrorResponse> lateResponse = testRestTemplate.postForEntity(
+                    "/api/v1/reservations", lateRequest, ErrorResponse.class);
+
+            // then : 응답 상태·바디 검증 (409 Conflict + ErrorResponse: SEAT_ALREADY_OCCUPIED)
+            assertThat(lateResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+            assertThat(lateResponse.getBody()).isNotNull();
+            assertThat(lateResponse.getBody().status()).isEqualTo(HttpStatus.CONFLICT.value());
+            assertThat(lateResponse.getBody().message()).isEqualTo("이미 예매된 좌석입니다.");
+
+            // then : DB 좌석 상태 검증 (SOLD 유지)
+            assertThat(seatRepository.findById(seat.getId()).orElseThrow().getStatus()).isEqualTo(SeatStatus.SOLD);
+
+            // then : DB 예매 상태 검증 (첫 번째 요청만 존재, 첫 번째 요청 예매 상태 CONFIRMED 유지)
+            assertThat(reservationRepository.findBySeatId(seat.getId()))
+                    .singleElement()
+                    .satisfies(r -> {
+                        assertThat(r.getId()).isEqualTo(reservationId);
+                        assertThat(r.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+                    });
+        }
     }
 
     @Nested
