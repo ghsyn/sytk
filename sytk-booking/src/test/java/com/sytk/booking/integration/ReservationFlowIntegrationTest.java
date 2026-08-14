@@ -8,16 +8,15 @@ import com.sytk.booking.repository.SeatGradeRepository;
 import com.sytk.booking.repository.SeatRepository;
 import com.sytk.booking.request.ReservationCreateRequest;
 import com.sytk.booking.response.ReservationCreateResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,7 +53,7 @@ class ReservationFlowIntegrationTest extends AbstractIntegrationTest {
     @Nested
     class 정상_예매 {
         @Test
-        @DisplayName("예매 가능한 좌석에 예매를 요청하면 201과 함께 예매가 생성되고 좌석이 선점된다.")
+        @DisplayName("예매 가능한 좌석(AVAILABLE)에 예매를 요청하면 예매 생성(RESERVING) 및 좌석 선점(OCCUPIED) 후 201 반환")
         void createReservationOnAvailableSeat() {
             // given
             Seat seat = persistAvailableSeat();
@@ -83,13 +82,38 @@ class ReservationFlowIntegrationTest extends AbstractIntegrationTest {
             assertThat(persistedReservation.getStatus()).isEqualTo(ReservationStatus.RESERVING);
             assertThat(persistedReservation.getUserId()).isEqualTo(1L);
             assertThat(persistedReservation.getSeatId()).isEqualTo(seat.getId());
+            assertThat(persistedReservation.getExpiredAt()).isAfter(now()).isBefore(now().plusMinutes(61));
+        }
+
+        @Test
+        @DisplayName("선점된 좌석(OCCUPIED)의 예매 결제 시 예매 확정(CONFIRMED) 및 좌석 판매 완료(SOLD) 후 204 반환")
+        void confirmReservationOnOccupiedSeat() {
+            // given
+            Seat seat = persistAvailableSeat();
+            ReservationCreateRequest request = ReservationCreateRequest.builder()
+                    .userId(1L)
+                    .seatId(seat.getId())
+                    .build();
+
+            Long reservationId = Objects.requireNonNull(testRestTemplate.postForEntity(
+                    "/api/v1/reservations", request, ReservationCreateResponse.class).getBody()).id();
+
+            // when
+            ResponseEntity<Void> response = testRestTemplate.exchange(
+                    "/api/v1/reservations/{id}/confirm", HttpMethod.PATCH, null, Void.class, reservationId);
+
+            // then : 204 + 좌석 SOLD + 예매 CONFIRMED
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+            assertThat(seatRepository.findById(seat.getId()).orElseThrow().getStatus()).isEqualTo(SeatStatus.SOLD);
+            assertThat(reservationRepository.findById(reservationId).orElseThrow().getStatus())
+                    .isEqualTo(ReservationStatus.CONFIRMED);
         }
     }
 
     @Nested
     class 중복_예매 {
         @Test
-        @DisplayName("같은 좌석에 순차적으로 2회 예매 시 첫 번째 요청이 정상적으로 이루어진다면 두 번째 요청은 409를 반환하고 좌석 상태는 변하지 않는다.")
+        @DisplayName("선점 중 좌석(OCCUPIED) 예매 요청 시 선점 상태(RESERVING/OCCUPIED) 유지 후 409 및 SEAT_ALREADY_OCCUPIED 예외 반환")
         void createReservationOnOccupiedSeat() {
             // given
             Seat seat = persistAvailableSeat();
@@ -102,11 +126,11 @@ class ReservationFlowIntegrationTest extends AbstractIntegrationTest {
                     "/api/v1/reservations", firstRequest, ReservationCreateResponse.class);
 
             assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-            assertThat(firstResponse.getBody().status()).isNotNull();
+            assertThat(firstResponse.getBody()).isNotNull();
             assertThat(firstResponse.getBody().status()).isEqualTo(ReservationStatus.RESERVING);
 
             ReservationCreateRequest secondRequest = ReservationCreateRequest.builder()
-                    .userId(2L)
+                    .userId(1L)
                     .seatId(seat.getId())
                     .build();
 
@@ -114,9 +138,10 @@ class ReservationFlowIntegrationTest extends AbstractIntegrationTest {
             ResponseEntity<ErrorResponse> secondResponse = testRestTemplate.postForEntity(
                     "/api/v1/reservations", secondRequest, ErrorResponse.class);
 
-            // then : 응답 상태·바디 검증 (409 Conflict + null)
+            // then : 응답 상태·바디 검증 (409 Conflict + ErrorResponse: SEAT_ALREADY_OCCUPIED)
             assertThat(secondResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
             assertThat(secondResponse.getBody()).isNotNull();
+            assertThat(secondResponse.getBody().status()).isEqualTo(HttpStatus.CONFLICT.value());
             assertThat(secondResponse.getBody().message()).isEqualTo("이미 예매된 좌석입니다.");
 
             // then : DB 좌석 상태 검증 (OCCUPIED 유지)
