@@ -208,7 +208,53 @@ class ReservationFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Nested
     class 취소_환불 {
-        /* 예매 후 취소 → 좌석 반환, 상태 복구 */
+        @Test
+        @DisplayName("선점한 좌석(OCCUPIED) 취소 요청 시 상태 복구 (AVAILABLE/CANCELED) 후 204 반환")
+        void cancelReservationOnSoldSeat() {
+            // given
+            Seat seat = persistAvailableSeat();
+            ReservationCreateRequest request = ReservationCreateRequest.builder()
+                    .userId(1L)
+                    .seatId(seat.getId())
+                    .build();
+
+            Long reservationId = Objects.requireNonNull(testRestTemplate.postForEntity(
+                    "/api/v1/reservations", request, ReservationCreateResponse.class).getBody()).id();
+
+            // when
+            ResponseEntity<Void> response = testRestTemplate.exchange(
+                    "/api/v1/reservations/{id}/cancel", HttpMethod.PATCH, null, Void.class, reservationId);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+            assertThat(seatRepository.findById(seat.getId()).orElseThrow().getStatus()).isEqualTo(SeatStatus.AVAILABLE);
+            assertThat(reservationRepository.findById(reservationId).orElseThrow().getStatus()).isEqualTo(ReservationStatus.CANCELED);
+        }
+
+        @Test
+        @DisplayName("구매한 좌석(SOLD) 환불 요청 시 상태 복구 (AVAILABLE/REFUNDED) 후 204 반환")
+        void refundReservationOnSeat() {
+            // given
+            Seat seat = persistAvailableSeat();
+            ReservationCreateRequest request = ReservationCreateRequest.builder()
+                    .userId(1L)
+                    .seatId(seat.getId())
+                    .build();
+
+            Long reservationId = Objects.requireNonNull(testRestTemplate.postForEntity(
+                    "/api/v1/reservations", request, ReservationCreateResponse.class).getBody()).id();
+            testRestTemplate.exchange(
+                    "/api/v1/reservations/{id}/confirm", HttpMethod.PATCH, null, Void.class, reservationId);
+
+            // when
+            ResponseEntity<Void> response = testRestTemplate.exchange(
+                    "/api/v1/reservations/{id}/refund", HttpMethod.PATCH, null, Void.class, reservationId);
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+            assertThat(seatRepository.findById(seat.getId()).orElseThrow().getStatus()).isEqualTo(SeatStatus.AVAILABLE);
+            assertThat(reservationRepository.findById(reservationId).orElseThrow().getStatus()).isEqualTo(ReservationStatus.REFUNDED);
+        }
     }
 
     /**
