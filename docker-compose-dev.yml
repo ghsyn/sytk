@@ -45,6 +45,22 @@ services:
       timeout: 5s
       retries: 5
 
+  # 4. 부하 테스트 (k6)
+  #  - 앱을 compose(app 프로파일)로 띄운 경우: 기본값 http://booking-service:8080 로 자동 연결
+  #  - 앱을 호스트(gradle 등)에서 띄운 경우: K6_BASE_URL=http://host.docker.internal:8080 로 오버라이드
+  k6:
+    image: grafana/k6:latest
+    profiles: ["test"]
+    container_name: sytk-k6
+    volumes:
+      - ./k6-tests:/k6-tests
+    environment:
+      BASE_URL: ${K6_BASE_URL:-http://booking-service:8080}
+      SEAT_ID: ${K6_SEAT_ID:-1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: run /k6-tests/scenarios/booking/concurrency.js
+
   sytk-kafka:
     image: confluentinc/cp-kafka:${CONFLUENT_PLATFORM_VERSION:-7.7.8}
     profiles: ["infra"]
