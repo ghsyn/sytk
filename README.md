@@ -1,7 +1,7 @@
 # SYTK — Service Your Ticket
 
 > 대규모 트래픽 환경을 고려한 티켓 예매 서비스  
-> 2026.XX ~ 2026.XX (개인 프로젝트)  
+> 2026.04 ~ 현재 (개인 프로젝트)  
 > Modular Monolith · CQRS · Event-Driven Architecture · 다중 전략 동시성 제어
 
 ### 목차
